@@ -3,6 +3,7 @@ export enum TerminalMsgType {
     INPUT = '[TerminalMsg] - INPUT',
     RESIZE = '[TerminalMsg] - RESIZE',
     CLEAR = '[TerminalMsg] - CLEAR',
+    FULL_SCREEN = '[TerminalMsg] - FULL_SCREEN',
 };
 
 export interface TerminalMsgTypes {
@@ -23,6 +24,10 @@ export interface TerminalMsgTypes {
 
     Clear: {
         type: TerminalMsgType.CLEAR;
+    }
+
+    FullScreen: {
+        type: TerminalMsgType.FULL_SCREEN;
     }
 }
 

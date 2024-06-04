@@ -24,7 +24,15 @@ export default function TerminalMain() {
             cols: 80,
             rows: 30,
             cursorStyle: 'block',
-            fontSize: 14
+            fontSize: 14,
+            theme: {
+                background: '#222223',
+                foreground: '#fd6'
+            },
+            windowOptions: {
+                fullscreenWin: true,
+            }
+
         });
 
         const fitAddon = new FitAddon();
@@ -34,8 +42,18 @@ export default function TerminalMain() {
         refs.fitAddon = fitAddon;
 
         term.open(refs.wrap);
-        term.onKey(({ key }) => {
-            send(key);
+        term.onKey(({ key, domEvent }) => {
+            const code = key.charCodeAt(0);
+            if (code > 32 || code === 13) {
+                send(key);
+            } else {
+                if (domEvent.key === 'F11') {
+                    window.api.sendToTerminal({
+                        type: TerminalMsgType.FULL_SCREEN
+                    });
+                }
+                console.log(domEvent)
+            }
         });
 
         let firstRender = true;
@@ -72,6 +90,16 @@ export default function TerminalMain() {
         refs.term!.write(msg as string);
     });
 
+    useEffect(() => {
+        const handleResize = () => {
+            refs.fitAddon?.fit();
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     function emitInit() {
         window.api.sendToTerminal({
             type: TerminalMsgType.INIT
@@ -105,12 +133,13 @@ export default function TerminalMain() {
             w-full
             flex flex-row
             justify-center
+            bg-[#222]
         }`}>
 
             <div
                 ref={refs.setter('wrap')}
                 className={`@tw{
-                    w-full h-[95vh]
+                    w-full h-screen
                 }`}
             />
 

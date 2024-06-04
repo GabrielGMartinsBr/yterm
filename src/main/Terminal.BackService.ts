@@ -87,6 +87,11 @@ export class TerminalBService {
                 this.tInstance.lastData = '';
                 break;
             }
+            case TerminalMsgType.FULL_SCREEN: {
+                const isFullScreen = this.mainWindow!.isFullScreen;
+                this.mainWindow!.setFullScreen(!isFullScreen);
+                break;
+            }
         }
     }
 
