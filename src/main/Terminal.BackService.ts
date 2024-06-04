@@ -88,7 +88,7 @@ export class TerminalBService {
                 break;
             }
             case TerminalMsgType.FULL_SCREEN: {
-                const isFullScreen = this.mainWindow!.isFullScreen;
+                const isFullScreen = this.mainWindow!.fullScreen;
                 this.mainWindow!.setFullScreen(!isFullScreen);
                 break;
             }
