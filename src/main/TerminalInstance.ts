@@ -4,9 +4,11 @@ import pty from 'node-pty';
 
 export class TerminalInstance {
     process: pty.IPty;
+    lastData: string;
 
     constructor() {
         this.process = this.createProcess();
+        this.lastData = '';
     }
 
     write(cmd: string) {

@@ -1,6 +1,7 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import { IpcChannel } from '@common/IpcDefinitions';
 import { TerminalInstance } from './TerminalInstance';
+import { TerminalMsg, TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
 
 export class TerminalBService {
     static getInstance() {
@@ -37,15 +38,17 @@ export class TerminalBService {
         this.initialized = true;
         this.listenIPC();
     }
-    
-    private createInstance() { 
+
+    private createInstance() {
         if (this.tInstance) {
             return;
         }
-        this.tInstance = new TerminalInstance();
-        this.tInstance.process.onData(data => {
-            this.mainWindow?.webContents.send(IpcChannel.TERMINAL, data); 
+        const instance = new TerminalInstance();
+        instance.process.onData(data => {
+            instance.lastData += data;
+            this.mainWindow!.webContents.send(IpcChannel.TERMINAL, data);
         });
+        this.tInstance = instance;
     }
 
     private listenIPC() {
@@ -57,14 +60,42 @@ export class TerminalBService {
         });
     }
 
-    private handleMessage(msg: string) {
-        console.log({ msg });
+    private handleMessage(msg: TerminalMsg) {
         if (!this.tInstance) {
             this.createInstance();
-        } else {
-            this.tInstance.write(msg);
         }
-        // this.tInstance.test();
+        if (!this.tInstance) {
+            throw new Error('Create terminal instance failed.');
+        }
+        switch (msg.type) {
+            case TerminalMsgType.INIT: {
+                this.sendLastOutput();
+                break;
+            }
+            case TerminalMsgType.INPUT: {
+                this.tInstance.write(msg.data);
+                break;
+            }
+            case TerminalMsgType.RESIZE: {
+                this.tInstance.process.resize(
+                    msg.cols,
+                    msg.rows
+                );
+                break;
+            }
+            case TerminalMsgType.CLEAR: {
+                this.tInstance.lastData = '';
+                break;
+            }
+        }
+    }
+
+    private sendLastOutput() {
+        if (!this.tInstance) {
+            throw new Error('Terminal instance is not defined.');
+        }
+        const lastOutput = this.tInstance.lastData;
+        this.mainWindow!.webContents.send(IpcChannel.TERMINAL, lastOutput);
     }
 
 }

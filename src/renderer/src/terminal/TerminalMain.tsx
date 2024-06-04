@@ -1,14 +1,17 @@
 import { useEffect } from 'react';
 import { useRefSet3 } from '@renderer/hooks/useRefSet3';
 import { Terminal } from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
 import { useIpcMessage } from '@renderer/hooks/useIpcMessage';
 import { IpcChannel } from '@common/IpcDefinitions';
+import { TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
+
 
 export default function TerminalMain() {
     const refs = useRefSet3(class {
         wrap: HTMLDivElement | null = null;
         term: Terminal | null = null;
-        cmd = '';
+        fitAddon: FitAddon | null = null;
     });
 
     useEffect(() => {
@@ -18,45 +21,47 @@ export default function TerminalMain() {
 
         const term = new Terminal({
             allowTransparency: true,
+            cols: 80,
+            rows: 30,
+            cursorStyle: 'block',
+            fontSize: 14
         });
-        term.open(refs.wrap);
 
-
-        // term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ');
-        term.onKey(({ key }) => {
-            window.api.sendToTerminal(key);
-            // const code = key.charCodeAt(0);
-            // if (code >= 32 && code < 127) {
-            //     pushKey(key);
-            //     send();
-            //     return;
-            // }
-            // switch (key.charCodeAt(0)) {
-            //     case 12:
-            //         window.api.sendToTerminal(key);
-            //         break;
-            //     case 13:
-            //         pushKey(key);
-            //         send();
-            //         break;
-            //     case 127:
-            //         term.write("\b \b");
-            //         refs.cmd = refs.cmd.slice(0, refs.cmd.length - 1);
-            //         break;
-            //     default:
-            //         window.api.sendToTerminal(key);
-            //         // console.log(refs.cmd);
-            //         console.log(key.charCodeAt(0));
-            //         break;
-
-            // }
-        })
+        const fitAddon = new FitAddon();
+        term.loadAddon(fitAddon);
 
         refs.term = term;
+        refs.fitAddon = fitAddon;
+
+        term.open(refs.wrap);
+        term.onKey(({ key }) => {
+            send(key);
+        });
+
+        let firstRender = true;
+        term.onRender(() => {
+            if (firstRender) {
+                fitAddon.fit();
+                emitInit();
+                firstRender = false;
+            }
+        });
+
+        term.onResize(({ cols, rows }) => {
+            emitResize(cols, rows);
+        });
+
+        term.onData((data) => {
+            if (data.charCodeAt(0) === 12) {
+                emitClear();
+            }
+        })
 
         return () => {
             term.dispose();
+            fitAddon.dispose();
             refs.term = null;
+            refs.fitAddon = null;
         };
     }, []);
 
@@ -64,30 +69,50 @@ export default function TerminalMain() {
         if (!refs.term) {
             return;
         }
-        // console.log(msg);
         refs.term!.write(msg as string);
     });
 
-    function pushKey(key: string) {
-        refs.cmd += key;
-        // refs.term!.write(key);
+    function emitInit() {
+        window.api.sendToTerminal({
+            type: TerminalMsgType.INIT
+        });
     }
 
-    function send() {
-        window.api.sendToTerminal(refs.cmd);
-        refs.cmd = '';
+    function send(key: string) {
+        window.api.sendToTerminal({
+            type: TerminalMsgType.INPUT,
+            data: key
+        });
+    }
+
+    function emitResize(cols: number, rows: number) {
+        window.api.sendToTerminal({
+            type: TerminalMsgType.RESIZE,
+            cols: cols,
+            rows: rows
+        });
+    }
+
+    function emitClear() {
+        refs.term!.clear();
+        window.api.sendToTerminal({
+            type: TerminalMsgType.CLEAR
+        });
     }
 
     return (
         <div className={`@tw{
-            w-full py-12
+            w-full
             flex flex-row
             justify-center
         }`}>
 
-            <div ref={refs.setter('wrap')}>
-
-            </div>
+            <div
+                ref={refs.setter('wrap')}
+                className={`@tw{
+                    w-full h-[95vh]
+                }`}
+            />
 
         </div>
     )

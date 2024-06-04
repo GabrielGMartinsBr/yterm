@@ -24,6 +24,7 @@
     "@electron-toolkit/preload": "^2.0.0",
     "@electron-toolkit/utils": "^2.0.1",
     "@headlessui/react": "^2.0.4",
+    "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
     "electron-updater": "6.3.0-alpha.4",
     "immer": "^10.1.1",
