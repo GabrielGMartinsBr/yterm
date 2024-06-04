@@ -8,6 +8,7 @@ export default function TerminalMain() {
     const refs = useRefSet3(class {
         wrap: HTMLDivElement | null = null;
         term: Terminal | null = null;
+        cmd = '';
     });
 
     useEffect(() => {
@@ -23,20 +24,32 @@ export default function TerminalMain() {
 
         // term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ');
         term.onKey(({ key }) => {
-            // console.log(key.charCodeAt(0), key.length);
-            switch (key.charCodeAt(0)) {
-                case 13:
-                    window.api.sendToTerminal('init');
-                    break;
-                case 127:
-                    term.write("\b \b");
-                    break;
-                default:
-                    term.write(key);
-                    console.log(key.charCodeAt(0));
-                    break;
+            window.api.sendToTerminal(key);
+            // const code = key.charCodeAt(0);
+            // if (code >= 32 && code < 127) {
+            //     pushKey(key);
+            //     send();
+            //     return;
+            // }
+            // switch (key.charCodeAt(0)) {
+            //     case 12:
+            //         window.api.sendToTerminal(key);
+            //         break;
+            //     case 13:
+            //         pushKey(key);
+            //         send();
+            //         break;
+            //     case 127:
+            //         term.write("\b \b");
+            //         refs.cmd = refs.cmd.slice(0, refs.cmd.length - 1);
+            //         break;
+            //     default:
+            //         window.api.sendToTerminal(key);
+            //         // console.log(refs.cmd);
+            //         console.log(key.charCodeAt(0));
+            //         break;
 
-            }
+            // }
         })
 
         refs.term = term;
@@ -51,12 +64,26 @@ export default function TerminalMain() {
         if (!refs.term) {
             return;
         }
-        console.log(msg);
-        refs.term.write(msg as string);
+        // console.log(msg);
+        refs.term!.write(msg as string);
     });
 
+    function pushKey(key: string) {
+        refs.cmd += key;
+        // refs.term!.write(key);
+    }
+
+    function send() {
+        window.api.sendToTerminal(refs.cmd);
+        refs.cmd = '';
+    }
+
     return (
-        <div>
+        <div className={`@tw{
+            w-full py-12
+            flex flex-row
+            justify-center
+        }`}>
 
             <div ref={refs.setter('wrap')}>
 

@@ -62,7 +62,7 @@ export class TerminalBService {
         if (!this.tInstance) {
             this.createInstance();
         } else {
-            this.tInstance.test();
+            this.tInstance.write(msg);
         }
         // this.tInstance.test();
     }

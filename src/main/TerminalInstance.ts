@@ -7,13 +7,10 @@ export class TerminalInstance {
 
     constructor() {
         this.process = this.createProcess();
-        // this.process.onData(data => {
-        //     console.log(data);
-        // });
     }
 
-    test() {
-        this.process.write('ls\r');
+    write(cmd: string) {
+        this.process.write(cmd);
     }
 
     private createProcess() {
