@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRefSet3 } from './useRefSet3';
 
-type Listener = (...args: any) => any;
+type Listener = (...args: unknown[]) => void;
 
 export function useIpcMessage(channel: string, listener: Listener) {
     const refs = useRefSet3(class {
@@ -14,7 +14,7 @@ export function useIpcMessage(channel: string, listener: Listener) {
 
     useEffect(() => {
         const { ipcRenderer } = window.electron;
-        const cleanup = ipcRenderer.on(channel, (...args: any) => {
+        const cleanup = ipcRenderer.on(channel, (...args: unknown[]) => {
             if (refs.listener) {
                 refs.listener(...args);
             }

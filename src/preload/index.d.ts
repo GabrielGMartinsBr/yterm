@@ -7,11 +7,7 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: {
-      msgToEditorBService: (msg: EditorBServiceMsg, ...args: unknown[]) => void;
-
-      onWinResize: (cb: () => void) => unknown;
-      sendMsgToScripts(action: ScriptsMsg): void;
-      sendMsgToLauncherService(msg: LauncherMsg): void;
+      sendToTerminal: (...args: unknown[]) => void;
     }
   }
 }

@@ -1,9 +1,12 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { IpcChannel } from '@common/IpcDefinitions';
 
 // Custom APIs for renderer
 const api = {
-
+  sendToTerminal(...args: unknown[]) {
+    ipcRenderer.send(IpcChannel.TERMINAL, ...args);
+  },
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

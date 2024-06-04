@@ -3,7 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
 import icon from '../../resources/icon.png?asset'
-import { EditorBackService } from './EditorBackService'
+import { TerminalBService } from './Terminal.BackService';
 
 function createWindow(): void {
   // Create the browser window.
@@ -19,8 +19,7 @@ function createWindow(): void {
     }
   });
 
-  EditorBackService.init(mainWindow);
-
+  TerminalBService.init(mainWindow);
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

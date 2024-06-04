@@ -18,8 +18,8 @@ dependencies:
     specifier: ^5.5.0
     version: 5.5.0
   electron-updater:
-    specifier: ^6.1.8
-    version: 6.1.8
+    specifier: 6.3.0-alpha.4
+    version: 6.3.0-alpha.4
   immer:
     specifier: ^10.1.1
     version: 10.1.1
@@ -29,6 +29,9 @@ dependencies:
   monaco-editor:
     specifier: ^0.49.0
     version: 0.49.0
+  node-pty:
+    specifier: ^1.0.0
+    version: 1.0.0
   react-icons:
     specifier: ^4.12.0
     version: 4.12.0(react@18.3.1)
@@ -2113,16 +2116,6 @@ packages:
       ieee754: 1.2.1
     dev: false
 
-  /builder-util-runtime@9.2.3:
-    resolution: {integrity: sha512-FGhkqXdFFZ5dNC4C+yuQB9ak311rpGAw+/ASz8ZdxwODCv1GGMWgLDeofRkdi0F3VCHQEWy/aXcJQozx2nOPiw==}
-    engines: {node: '>=12.0.0'}
-    dependencies:
-      debug: 4.3.5
-      sax: 1.4.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /builder-util-runtime@9.2.4:
     resolution: {integrity: sha512-upp+biKpN/XZMLim7aguUyW8s0FUpDvOtK6sbanMFDAMBzpHDqdhgVYm6zc9HJ6nWo7u2Lxk60i2M6Jd3aiNrA==}
     engines: {node: '>=12.0.0'}
@@ -2132,6 +2125,16 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /builder-util-runtime@9.2.5-alpha.2:
+    resolution: {integrity: sha512-/Ln2ddejGj2HNMJ+X66mKHRcOvmRzUO/dSi8t4hSV64J7IA+DE+mqDb+zogIE2gin7p7YwcGiOkKny4nwPPPXg==}
+    engines: {node: '>=12.0.0'}
+    dependencies:
+      debug: 4.3.5
+      sax: 1.4.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /builder-util@24.13.1:
     resolution: {integrity: sha512-NhbCSIntruNDTOVI9fdXz0dihaqX2YuE1D6zZMrwiErzH4ELZHE6mdiB40wEgZNprDia+FghRFgKoAqMZRRjSA==}
@@ -2668,10 +2671,10 @@ packages:
     resolution: {integrity: sha512-ubp5+Ev/VV8KuRoWnfP2QF2Bg+O2ZFdb49DiiNbz2VmgkIqrnyYaqIOqj8A6K/3p1xV0QcU5hBQ1+BmB6ot1OA==}
     dev: true
 
-  /electron-updater@6.1.8:
-    resolution: {integrity: sha512-hhOTfaFAd6wRHAfUaBhnAOYc+ymSGCWJLtFkw4xJqOvtpHmIdNHnXDV9m1MHC+A6q08Abx4Ykgyz/R5DGKNAMQ==}
+  /electron-updater@6.3.0-alpha.4:
+    resolution: {integrity: sha512-01Pmb4K23cIos6zuvX3e0MF3KxScHFaHivCs+6LUcnUZTuGuRfwGrQU7ov2iChbV0U5o+hnVecrO/HI6UoRT1Q==}
     dependencies:
-      builder-util-runtime: 9.2.3
+      builder-util-runtime: 9.2.5-alpha.2
       fs-extra: 10.1.0
       js-yaml: 4.1.0
       lazy-val: 1.0.5
@@ -4216,6 +4219,10 @@ packages:
       thenify-all: 1.6.0
     dev: true
 
+  /nan@2.19.0:
+    resolution: {integrity: sha512-nO1xXxfh/RWNxfd/XPfbIfFk5vgLsAxUR9y5O0cHMJu/AW9U95JLXqthYHjEp+8gQ5p96K9jUp8nbVOxCdRbtw==}
+    dev: false
+
   /nanoid@3.3.7:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -4238,6 +4245,13 @@ packages:
   /node-gyp-build@4.8.1:
     resolution: {integrity: sha512-OSs33Z9yWr148JZcbZd5WiAXhh/n9z8TxQcdMhIOlpN9AhWpLfvVFO73+m77bBABQMaY9XSvIa+qk0jlI7Gcaw==}
     hasBin: true
+    dev: false
+
+  /node-pty@1.0.0:
+    resolution: {integrity: sha512-wtBMWWS7dFZm/VgqElrTvtfMq4GzJ6+edFI0Y0zyzygUSZMgZdraDUMUhCIvkjhJjme15qWmbyJbtAx4ot4uZA==}
+    requiresBuild: true
+    dependencies:
+      nan: 2.19.0
     dev: false
 
   /node-releases@2.0.14:
