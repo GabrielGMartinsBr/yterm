@@ -43,17 +43,12 @@ export default function TerminalMain() {
 
         term.open(refs.wrap);
         term.onKey(({ key, domEvent }) => {
-            const code = key.charCodeAt(0);
-            if (code > 31 || code === 13) {
-                send(key);
+            if (domEvent.key === 'F11') {
+                window.api.sendToTerminal({
+                    type: TerminalMsgType.FULL_SCREEN
+                });
             } else {
-                if (domEvent.key === 'F11') {
-                    window.api.sendToTerminal({
-                        type: TerminalMsgType.FULL_SCREEN
-                    });
-                } else {
-                    console.log(key.charCodeAt(0))
-                }
+                send(key);
             }
         });
 
