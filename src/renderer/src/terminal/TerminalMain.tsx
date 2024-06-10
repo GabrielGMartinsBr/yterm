@@ -25,14 +25,15 @@ export default function TerminalMain() {
             rows: 30,
             cursorStyle: 'block',
             fontSize: 14,
+            
             theme: {
                 background: '#222223',
-                foreground: '#fd6'
+                foreground: '#fd6',
+
             },
             windowOptions: {
                 fullscreenWin: true,
-            }
-
+            },
         });
 
         const fitAddon = new FitAddon();
@@ -126,16 +127,18 @@ export default function TerminalMain() {
 
     return (
         <div className={`@tw{
-            w-full
-            flex flex-row
-            justify-center
+            w-full h-screen
+            flex flex-row px-1 py-2
+            justify-stretch items-stretch
+            overflow-hidden
             bg-[#222]
         }`}>
 
             <div
                 ref={refs.setter('wrap')}
                 className={`@tw{
-                    w-full h-screen
+                    y-term-wrap
+                    w-auto flex-1
                 }`}
             />
 

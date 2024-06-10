@@ -1,0 +1,11 @@
+@import '@xterm/xterm/css/xterm.css';
+
+.y-term-wrap .xterm .xterm-viewport {
+    overflow-x: auto;
+    @apply scrollbar;
+    @apply scrollbar-thumb-zinc-300/30;
+}
+
+.y-term-wrap .xterm .xterm-viewport::-webkit-scrollbar {
+    width: 12px;
+}
