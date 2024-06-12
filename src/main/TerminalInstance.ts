@@ -1,12 +1,15 @@
 import os from 'node:os';
+import { nanoid } from 'nanoid';
 import pty from 'node-pty';
 
 
 export class TerminalInstance {
+    readonly uid: string;
     process: pty.IPty;
     lastData: string;
 
     constructor() {
+        this.uid = nanoid();
         this.process = this.createProcess();
         this.lastData = '';
     }
