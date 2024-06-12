@@ -2,9 +2,13 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { IpcChannel } from '@common/IpcDefinitions';
 import { TerminalMsg } from '@common/ipcMsgs/TerminalMsgs';
+import { MainServiceMsg } from '@common/ipcMsgs/MainServiceMsgs';
 
 // Custom APIs for renderer
 const api = {
+  pushMainServiceMsg: (msg: MainServiceMsg, ...args: unknown[]) => {
+    ipcRenderer.send(IpcChannel.MAIN, msg, ...args);
+  },
   sendToTerminal(msg: TerminalMsg, ...args: unknown[]) {
     ipcRenderer.send(IpcChannel.TERMINAL, msg, ...args);
   },

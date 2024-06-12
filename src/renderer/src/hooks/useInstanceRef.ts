@@ -8,11 +8,11 @@ export interface OnDestroy {
     onDestroy(): void;
 }
 
-type Constructable<T> = new (...args: any[]) => T;
+type Constructable<T> = new (...args: unknown[]) => T;
 
 export function useInstanceRef<T>(
     constructor: Constructable<T>,
-    deps?: any
+    deps?: unknown[]
 ) {
     type Instance = T & Partial<OnInit & OnDestroy>
 

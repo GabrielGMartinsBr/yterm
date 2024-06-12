@@ -5,6 +5,8 @@ import { FitAddon } from '@xterm/addon-fit';
 import { useIpcMessage } from '@renderer/hooks/useIpcMessage';
 import { IpcChannel } from '@common/IpcDefinitions';
 import { TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
+import { useInstanceRef } from '@renderer/hooks/useInstanceRef';
+import { MainServiceMsg, MainServiceMsgType } from '@common/ipcMsgs/MainServiceMsgs';
 
 
 export default function TerminalMain() {
@@ -13,6 +15,28 @@ export default function TerminalMain() {
         term: Terminal | null = null;
         fitAddon: FitAddon | null = null;
     });
+    const fns = useInstanceRef(class {
+        requestCopy() {
+            if (!refs.term) {
+                return;
+            }
+            const { term } = refs;
+            const selection = term.getSelection();
+            window.api.pushMainServiceMsg({
+                type: MainServiceMsgType.COPY,
+                data: selection
+            });
+        }
+
+        requestPaste() {
+            if (!refs.term) {
+                return;
+            }
+            window.api.pushMainServiceMsg({
+                type: MainServiceMsgType.REQUEST_PASTE
+            });
+        }
+    }, []);
 
     useEffect(() => {
         if (!refs.wrap) {
@@ -25,7 +49,7 @@ export default function TerminalMain() {
             rows: 30,
             cursorStyle: 'block',
             fontSize: 14,
-            
+
             theme: {
                 background: '#222223',
                 foreground: '#fd6',
@@ -36,6 +60,10 @@ export default function TerminalMain() {
             },
         });
 
+        term.onBinary(a => {
+            console.log(a);
+        })
+
         const fitAddon = new FitAddon();
         term.loadAddon(fitAddon);
 
@@ -44,6 +72,7 @@ export default function TerminalMain() {
 
         term.open(refs.wrap);
         term.onKey(({ key, domEvent }) => {
+            // console.log(key.charCodeAt(0), domEvent);
             if (domEvent.key === 'F11') {
                 window.api.sendToTerminal({
                     type: TerminalMsgType.FULL_SCREEN
@@ -87,13 +116,41 @@ export default function TerminalMain() {
         refs.term!.write(msg as string);
     });
 
+    useIpcMessage(IpcChannel.MAIN, (_, ...args: unknown[]) => {
+        if (!refs.term) {
+            return;
+        }
+        const msg = args[0] as MainServiceMsg;
+        if (!msg?.type) {
+            throw new Error('Invalid main service msg received.');
+        }
+        if (msg.type === MainServiceMsgType.PASTE) {
+            refs.term!.write(msg.data);
+        }
+    });
+
     useEffect(() => {
         const handleResize = () => {
             refs.fitAddon?.fit();
         };
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!e.shiftKey || !e.ctrlKey) {
+                return;
+            }
+            switch (e.code) {
+                case 'KeyC':
+                    fns().requestCopy();
+                    break;
+                case 'KeyV':
+                    fns().requestPaste();
+                    break;
+            }
+        };
         window.addEventListener('resize', handleResize);
+        window.addEventListener('keydown', handleKeyDown);
         return () => {
             window.removeEventListener('resize', handleResize);
+            window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
 

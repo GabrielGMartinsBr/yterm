@@ -24,7 +24,7 @@ export class TerminalBService {
 
     private initialized: boolean;
     private mainWindow?: BrowserWindow;
-    private tInstance?: TerminalInstance;
+    tInstance?: TerminalInstance;
 
     private constructor() {
         this.initialized = false;
