@@ -1,11 +1,9 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import { IpcChannel } from '@common/IpcDefinitions';
-import { TerminalInstance } from './TerminalInstance';
 import { TerminalMsg, TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
+import { TerminalInstance } from './TerminalInstance';
+import { TerminalOutput } from '@common/types/TerminalOutput';
 
-const dirMarkerRegex = /^DIR_MARKER:(.*)$\r\n/gm;
-const setupCompleteMarker = 'SETUP_COMPLETE';
-const setupCompleteMarkerRegex = /^SETUP_COMPLETE\r$/gm;
 
 export class TerminalBService {
     static getInstance() {
@@ -32,6 +30,7 @@ export class TerminalBService {
 
     private constructor() {
         this.initialized = false;
+        this.sendOutput = this.sendOutput.bind(this);
     }
 
     private init(mainWindow: BrowserWindow) {
@@ -47,11 +46,8 @@ export class TerminalBService {
         if (this.tInstance) {
             return;
         }
-        const instance = new TerminalInstance();
-        instance.write(`export PROMPT_COMMAND='echo -n "DIR_MARKER:"; pwd'\n`);
-        instance.write(`echo "${setupCompleteMarker}"\n`);
-        instance.process.onData(data => {
-            this.handleTerminalData(data);
+        const instance = new TerminalInstance({
+            sendOutput: this.sendOutput
         });
         this.tInstance = instance;
     }
@@ -74,7 +70,7 @@ export class TerminalBService {
         }
         switch (msg.type) {
             case TerminalMsgType.INIT: {
-                this.sendLastOutput();
+                this.tInstance.sendLastOutput();
                 break;
             }
             case TerminalMsgType.INPUT: {
@@ -82,14 +78,11 @@ export class TerminalBService {
                 break;
             }
             case TerminalMsgType.RESIZE: {
-                this.tInstance.process.resize(
-                    msg.cols,
-                    msg.rows
-                );
+                this.tInstance.resize(msg.cols,msg.rows);
                 break;
             }
             case TerminalMsgType.CLEAR: {
-                this.tInstance.lastData = '';
+                // this.tInstance.lastData = '';
                 break;
             }
             case TerminalMsgType.FULL_SCREEN: {
@@ -100,41 +93,16 @@ export class TerminalBService {
         }
     }
 
-    private sendLastOutput() {
-        if (!this.tInstance) {
-            throw new Error('Terminal instance is not defined.');
-        }
-        const lastOutput = this.tInstance.lastData;
-        this.mainWindow!.webContents.send(IpcChannel.TERMINAL, lastOutput);
+    private sendOutput(output: TerminalOutput) {
+        this.sendMsg({
+            type: TerminalMsgType.OUTPUT,
+            uid: output.uid,
+            pwd: output.pwd,
+            data: output.data
+        });
     }
 
-    private handleTerminalData(data: string) {
-        if (!this.tInstance || !this.mainWindow) {
-            throw new Error("tInstance or/and mainWindow was not defined.");
-        }
-
-        const result = dirMarkerRegex.exec(data);
-        if (result) {
-            console.log('dir:', result[1]);
-            data = data.replace(dirMarkerRegex, '');
-        }
-
-        if (!this.tInstance.isSetupComplete) {
-            const result2 = setupCompleteMarkerRegex.exec(data);
-            if (result2) {
-                const startIndex = result2.index + result2[0].length + 1;
-                data = data.slice(startIndex);
-                this.sendOutput(data);
-                this.tInstance.isSetupComplete = true;
-            }
-            return;
-        }
-
-        this.sendOutput(data);
-    }
-
-    private sendOutput(data: string) {
-        this.tInstance!.lastData += data;
-        this.mainWindow!.webContents.send(IpcChannel.TERMINAL, data);
+    private sendMsg(msg: TerminalMsg) {
+        this.mainWindow!.webContents.send(IpcChannel.TERMINAL, msg);
     }
 }

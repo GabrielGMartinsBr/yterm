@@ -1,6 +1,7 @@
 export enum TerminalMsgType {
     INIT = '[TerminalMsg] - INIT',
     INPUT = '[TerminalMsg] - INPUT',
+    OUTPUT = '[TerminalMsg] - OUTPUT',
     RESIZE = '[TerminalMsg] - RESIZE',
     CLEAR = '[TerminalMsg] - CLEAR',
     FULL_SCREEN = '[TerminalMsg] - FULL_SCREEN',
@@ -13,6 +14,13 @@ export interface TerminalMsgTypes {
 
     Input: {
         type: TerminalMsgType.INPUT;
+        data: string;
+    }
+
+    Output: {
+        type: TerminalMsgType.OUTPUT;
+        uid: string;
+        pwd: string;
         data: string;
     }
 

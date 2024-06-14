@@ -4,7 +4,7 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { useIpcMessage } from '@renderer/hooks/useIpcMessage';
 import { IpcChannel } from '@common/IpcDefinitions';
-import { TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
+import { TerminalMsg, TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
 import { useInstanceRef } from '@renderer/hooks/useInstanceRef';
 import { MainServiceMsg, MainServiceMsgType } from '@common/ipcMsgs/MainServiceMsgs';
 
@@ -108,11 +108,17 @@ export default function TerminalMain() {
         };
     }, []);
 
-    useIpcMessage(IpcChannel.TERMINAL, (_, msg) => {
+    useIpcMessage(IpcChannel.TERMINAL, (_, ...args: unknown[]) => {
         if (!refs.term) {
             return;
         }
-        refs.term!.write(msg as string);
+        const msg = args[0] as TerminalMsg;
+        if (!msg?.type) {
+            throw new Error('Invalid main service msg received.');
+        }
+        if (msg.type === TerminalMsgType.OUTPUT) {
+            refs.term!.write(msg.data);
+        }
     });
 
     useIpcMessage(IpcChannel.MAIN, (_, ...args: unknown[]) => {
