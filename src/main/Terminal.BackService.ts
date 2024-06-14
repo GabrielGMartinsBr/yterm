@@ -3,6 +3,10 @@ import { IpcChannel } from '@common/IpcDefinitions';
 import { TerminalInstance } from './TerminalInstance';
 import { TerminalMsg, TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
 
+const dirMarkerRegex = /^DIR_MARKER:(.*)$\r\n/gm;
+const setupCompleteMarker = 'SETUP_COMPLETE';
+const setupCompleteMarkerRegex = /^SETUP_COMPLETE\r$/gm;
+
 export class TerminalBService {
     static getInstance() {
         if (!this._instance) {
@@ -44,9 +48,10 @@ export class TerminalBService {
             return;
         }
         const instance = new TerminalInstance();
+        instance.write(`export PROMPT_COMMAND='echo -n "DIR_MARKER:"; pwd'\n`);
+        instance.write(`echo "${setupCompleteMarker}"\n`);
         instance.process.onData(data => {
-            instance.lastData += data;
-            this.mainWindow!.webContents.send(IpcChannel.TERMINAL, data);
+            this.handleTerminalData(data);
         });
         this.tInstance = instance;
     }
@@ -103,4 +108,33 @@ export class TerminalBService {
         this.mainWindow!.webContents.send(IpcChannel.TERMINAL, lastOutput);
     }
 
+    private handleTerminalData(data: string) {
+        if (!this.tInstance || !this.mainWindow) {
+            throw new Error("tInstance or/and mainWindow was not defined.");
+        }
+
+        const result = dirMarkerRegex.exec(data);
+        if (result) {
+            console.log('dir:', result[1]);
+            data = data.replace(dirMarkerRegex, '');
+        }
+
+        if (!this.tInstance.isSetupComplete) {
+            const result2 = setupCompleteMarkerRegex.exec(data);
+            if (result2) {
+                const startIndex = result2.index + result2[0].length + 1;
+                data = data.slice(startIndex);
+                this.sendOutput(data);
+                this.tInstance.isSetupComplete = true;
+            }
+            return;
+        }
+
+        this.sendOutput(data);
+    }
+
+    private sendOutput(data: string) {
+        this.tInstance!.lastData += data;
+        this.mainWindow!.webContents.send(IpcChannel.TERMINAL, data);
+    }
 }

@@ -7,11 +7,13 @@ export class TerminalInstance {
     readonly uid: string;
     process: pty.IPty;
     lastData: string;
+    isSetupComplete: boolean;
 
     constructor() {
         this.uid = nanoid();
         this.process = this.createProcess();
         this.lastData = '';
+        this.isSetupComplete = false;
     }
 
     write(cmd: string) {
