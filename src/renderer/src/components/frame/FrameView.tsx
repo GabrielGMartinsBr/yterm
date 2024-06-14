@@ -5,8 +5,8 @@ export default function FrameView(props: PropsWithChildren) {
     return (
         <div
             className={`@tw{
-                w-svw h-svh 
-                overflow-hidden
+                w-svw h-svh
+                overflow-hidden rounded
                 duration-0 transition-none
                 border border-zinc-900
             }`}
