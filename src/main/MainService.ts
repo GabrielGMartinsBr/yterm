@@ -59,15 +59,27 @@ export class MainService {
                 this.sendPasteData();
                 break;
             }
+            case MainServiceMsgType.MINIMIZE: {
+                this.minimize();
+                break;
+            }
+            case MainServiceMsgType.TOGGLE_MAXIMIZE: {
+                this.toggleMaximize();
+                break;
+            }
+            case MainServiceMsgType.CLOSE: {
+                this.close();
+                break;
+            }
         }
     }
 
-    private sendToRenderer(msg: MainServiceMsg) {
-        if (!this.mainWindow) {
-            throw new Error('MainWindow was not defined on MainService.');
-        }
-        this.mainWindow.webContents.send(IpcChannel.MAIN, msg);
-    }
+    // private sendToRenderer(msg: MainServiceMsg) {
+    //     if (!this.mainWindow) {
+    //         throw new Error('MainWindow was not defined on MainService.');
+    //     }
+    //     this.mainWindow.webContents.send(IpcChannel.MAIN, msg);
+    // }
 
     private sendPasteData() {
         const data = clipboard.readText('selection');
@@ -76,6 +88,31 @@ export class MainService {
         //     data
         // });
         TerminalBService.getInstance().tInstance!.write(data);
+    }
+
+    private minimize() {
+        if (!this.mainWindow) {
+            throw new Error('MainWindow not defined.');
+        }
+        this.mainWindow.minimize();
+    }
+
+    private toggleMaximize() {
+        if (!this.mainWindow) {
+            throw new Error('MainWindow not defined.');
+        }
+        if (this.mainWindow.isMaximized()) {
+            this.mainWindow.restore();
+        } else {
+            this.mainWindow.maximize();
+        }
+    }
+
+    private close() {
+        if (!this.mainWindow) {
+            throw new Error('MainWindow not defined.');
+        }
+        this.mainWindow.close();
     }
 
 }

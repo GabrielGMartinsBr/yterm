@@ -11,8 +11,14 @@ function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
+    minWidth: 320,
+    useContentSize: true,
     show: false,
+    frame: false,
     autoHideMenuBar: true,
+    transparent: true,
+    resizable: true,
+    visualEffectState: 'active',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -31,6 +37,14 @@ function createWindow(): void {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
+
+  // mainWindow.addListener('resize', (e) => {
+  //   const { width } = mainWindow.getBounds();
+  //   if (width < 320) {
+  //     mainWindow.setBounds({ width: 320 }, false);
+  //     console.log('ops');
+  //   }
+  // });
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.

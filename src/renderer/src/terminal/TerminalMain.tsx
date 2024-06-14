@@ -51,9 +51,8 @@ export default function TerminalMain() {
             fontSize: 14,
 
             theme: {
-                background: '#222223',
-                foreground: '#fd6',
-
+                background: 'rgba(33, 33, 33, 0)',
+                foreground: '#fc6',
             },
             windowOptions: {
                 fullscreenWin: true,
@@ -188,7 +187,6 @@ export default function TerminalMain() {
             flex flex-row px-1 py-2
             justify-stretch items-stretch
             overflow-hidden
-            bg-[#222]
         }`}>
 
             <div

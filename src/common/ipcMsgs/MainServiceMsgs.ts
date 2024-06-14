@@ -2,6 +2,9 @@ export enum MainServiceMsgType {
     COPY = '[MainServiceMsg] - COPY',
     REQUEST_PASTE = '[MainServiceMsg] - REQUEST_PASTE',
     PASTE = '[MainServiceMsg] - PASTE',
+    MINIMIZE = '[MainServiceMsg] - MINIMIZE',
+    TOGGLE_MAXIMIZE = '[MainServiceMsg] - TOGGLE_MAXIMIZE',
+    CLOSE = '[MainServiceMsg] - CLOSE',
 };
 
 export interface MainServiceMsgTypes {
@@ -15,6 +18,15 @@ export interface MainServiceMsgTypes {
     Paste: {
         type: MainServiceMsgType.PASTE;
         data: string;
+    }
+    Minimize: {
+        type: MainServiceMsgType.MINIMIZE
+    }
+    ToggleMaximize: {
+        type: MainServiceMsgType.TOGGLE_MAXIMIZE
+    }
+    Close: {
+        type: MainServiceMsgType.CLOSE
     }
     
 }
