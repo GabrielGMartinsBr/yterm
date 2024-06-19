@@ -1,7 +1,11 @@
 import { } from 'react-icons';
 import { FaTimes } from 'react-icons/fa';
 
-export default function FrameTab() {
+interface Props {
+  onClose: () => void;
+}
+
+export default function FrameTab(props: Props) {
   return (
     <div
       className={`@tw{
@@ -20,13 +24,15 @@ export default function FrameTab() {
       </h3>
 
       <button
+        onClick={props.onClose}
         className={`@tw{
           w-5 h-5 rounded-full
           flex flex-row
           justify-center items-center
           text-xs bg-zinc-900/30
           hover:bg-orange-400/80
-          transition-colors
+          active:opacity-50
+          transition-[colors_opacity]
           cursor-default
         }`}
       >
