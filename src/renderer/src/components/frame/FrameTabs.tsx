@@ -27,6 +27,7 @@ export default function FrameTabs() {
             {tabs.map(i => (
                 <FrameTab
                     key={i.uid}
+                    tab={i}
                     onClick={() => handleSelectTab(i.uid)}
                     onClose={() => handleCloseTab(i.uid)}
                 />

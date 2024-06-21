@@ -1,12 +1,16 @@
-import { } from 'react-icons';
 import { FaTimes } from 'react-icons/fa';
+import { TerminalTab } from '@common/types/TerminalTab';
+import { useAppContext } from '@renderer/AppContext';
 
 interface Props {
+  tab: TerminalTab;
   onClose: () => void;
   onClick: () => void;
 }
 
 export default function FrameTab(props: Props) {
+  const { selectedTab } = useAppContext();
+  const isSelected = props.tab.uid === selectedTab;
 
   const handleCloseClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -22,13 +26,16 @@ export default function FrameTab(props: Props) {
         justify-center items-center
         px-1
         rounded-md bg-zinc-300/30
+
+        ${isSelected ? 'bg-zinc-300/30 opacity-100' : 'bg-zinc-300/10 opacity-60'}
+        transition-[colors_opacity] duration-200
       }`}
     >
 
       <h3
         className={`@tw{pl-3}`}
       >
-        Frame Tab
+        Tab - {props.tab.uid.slice(-6)}
       </h3>
 
       <button
@@ -42,6 +49,7 @@ export default function FrameTab(props: Props) {
           active:opacity-50
           transition-[colors_opacity]
           cursor-default
+
         }`}
       >
         <FaTimes />
