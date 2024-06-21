@@ -3,11 +3,19 @@ import { FaTimes } from 'react-icons/fa';
 
 interface Props {
   onClose: () => void;
+  onClick: () => void;
 }
 
 export default function FrameTab(props: Props) {
+
+  const handleCloseClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    props.onClose();
+  };
+
   return (
     <div
+      onClick={props.onClick}
       className={`@tw{
         app-no-drag-area
         flex flex-row gap-3
@@ -24,7 +32,7 @@ export default function FrameTab(props: Props) {
       </h3>
 
       <button
-        onClick={props.onClose}
+        onClick={handleCloseClick}
         className={`@tw{
           w-5 h-5 rounded-full
           flex flex-row

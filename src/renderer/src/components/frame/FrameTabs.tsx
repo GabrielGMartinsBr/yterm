@@ -1,16 +1,21 @@
+import { TerminalTabUid } from '@common/types/TerminalTab';
+import { useAppContext } from '@renderer/AppContext';
 import FrameNewTabButton from './FrameNewTabButton';
 import FrameTab from './FrameTab';
-import { useAppContext } from '@renderer/AppContext';
 
 export default function FrameTabs() {
-    const { tabs, createTab, closeTab } = useAppContext();
+    const { tabs, createTab, closeTab, selectTab } = useAppContext();
 
     const handleAddTab = () => {
         createTab();
     };
 
-    const handleCloseTab = (uid: string) => {
+    const handleCloseTab = (uid: TerminalTabUid) => {
         closeTab(uid);
+    };
+
+    const handleSelectTab = (uid: TerminalTabUid) => {
+        selectTab(uid);
     };
 
     return (
@@ -22,6 +27,7 @@ export default function FrameTabs() {
             {tabs.map(i => (
                 <FrameTab
                     key={i.uid}
+                    onClick={() => handleSelectTab(i.uid)}
                     onClose={() => handleCloseTab(i.uid)}
                 />
             ))}
