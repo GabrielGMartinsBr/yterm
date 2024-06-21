@@ -1,11 +1,14 @@
+import AppCtrl from './AppCtrl'
 import Frame from './components/frame/Frame'
 import TerminalMain from './terminal/TerminalMain'
 
 function App(): JSX.Element {
   return (
-    <Frame>
-      <TerminalMain />
-    </Frame>
+    <AppCtrl>
+      <Frame>
+        <TerminalMain />
+      </Frame>
+    </AppCtrl>
   )
 }
 

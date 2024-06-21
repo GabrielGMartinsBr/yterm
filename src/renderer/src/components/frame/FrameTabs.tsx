@@ -1,29 +1,16 @@
-import { useImmer } from 'use-immer';
 import FrameNewTabButton from './FrameNewTabButton';
 import FrameTab from './FrameTab';
-import { nanoid } from 'nanoid';
+import { useAppContext } from '@renderer/AppContext';
 
 export default function FrameTabs() {
-    const [tabs, tabsUpdate] = useImmer([
-        { uid: nanoid() },
-        { uid: nanoid() },
-    ]);
+    const { tabs, createTab, closeTab } = useAppContext();
 
     const handleAddTab = () => {
-        tabsUpdate(d => {
-            d.push({
-                uid: nanoid()
-            });
-        });
+        createTab();
     };
 
     const handleCloseTab = (uid: string) => {
-        tabsUpdate(d => {
-            const index = d.findIndex(i => i.uid === uid);
-            if (index > -1) {
-                d.splice(index, 1);
-            }
-        });
+        closeTab(uid);
     };
 
     return (
