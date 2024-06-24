@@ -45,6 +45,10 @@ export class TerminalProcess {
         this.process.resize(cols, rows);
     }
 
+    kill(signal?: string) {
+        this.process.kill(signal);
+    }
+
     private createProcess() {
         const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
         return pty.spawn(shell, [], {

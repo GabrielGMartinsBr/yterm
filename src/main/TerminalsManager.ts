@@ -30,10 +30,8 @@ export class TerminalsManager {
     }
 
     closeTab(uid: TerminalTabUid) {
-        const index = this.tabs.findIndex(i => i.uid === uid);
-        if (index !== -1) {
-            this.tabs.splice(index, 1);
-        }
+        this.removeTabEntry(uid);
+        this.killTerminalProcess(uid);
     }
 
     write(uid: TerminalTabUid, data: string) {
@@ -50,6 +48,25 @@ export class TerminalsManager {
             throw new Error('Terminal process not found. Process UID: ' + uid);
         }
         process.resize(cols, rows);
+    }
+
+    private removeTabEntry(uid: TerminalTabUid) {
+        const index = this.tabs.findIndex(i => i.uid === uid);
+        const founded = index !== -1;
+        if (founded) {
+            this.tabs.splice(index, 1);
+        }
+    }
+
+    private killTerminalProcess(uid: TerminalTabUid) {
+        const index = this.processes.findIndex(i => i.uid === uid);
+        const founded = index !== -1;
+        if (founded) {
+            const process = this.processes[index];
+            process.kill();
+            this.processes.splice(index, 1);
+        }
+
     }
 
 }
