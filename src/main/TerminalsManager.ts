@@ -8,22 +8,26 @@ interface Callbacks {
 }
 
 export class TerminalsManager {
-    tabs: TerminalTab[];
-    private processes: TerminalProcess[];
+    private tabs: Map<TerminalTabUid, TerminalTab>;
+    private processes: Map<TerminalTabUid, TerminalProcess>;
 
     constructor(private callbacks: Callbacks) {
-        this.tabs = [];
-        this.processes = [];
+        this.tabs = new Map();
+        this.processes = new Map();
         this.handleProcessExit = this.handleProcessExit.bind(this);
     }
 
     getProcess(uid: TerminalTabUid) {
-        const process = this.processes.find(i => i.uid === uid);
+        const process = this.processes.get(uid);
         return process;
     }
 
+    getTabsArr() {
+        return Array.from(this.tabs.values());
+    }
+
     hasOpenedProcesses() {
-        return this.processes.length > 0;
+        return this.processes.size > 0;
     }
 
     createTab() {
@@ -34,8 +38,8 @@ export class TerminalsManager {
         const tab = {
             uid: process.uid
         };
-        this.processes.push(process);
-        this.tabs.push(tab);
+        this.processes.set(process.uid, process);
+        this.tabs.set(process.uid, tab);
     }
 
     closeTab(uid: TerminalTabUid) {
@@ -44,7 +48,7 @@ export class TerminalsManager {
     }
 
     write(uid: TerminalTabUid, data: string) {
-        const process = this.processes.find(i => i.uid === uid);
+        const process = this.processes.get(uid);
         if (!process) {
             throw new Error('Terminal process not found. Process UID: ' + uid);
         }
@@ -52,7 +56,7 @@ export class TerminalsManager {
     }
 
     resize(uid: TerminalTabUid, cols: number, rows: number) {
-        const process = this.processes.find(i => i.uid === uid);
+        const process = this.processes.get(uid);
         if (!process) {
             throw new Error('Terminal process not found. Process UID: ' + uid);
         }
@@ -69,33 +73,23 @@ export class TerminalsManager {
     }
 
     private removeProcess(uid: TerminalTabUid) {
-        const index = this.processes.findIndex(i => i.uid === uid);
-        const founded = index !== -1;
-        if (founded) {
-            this.processes.splice(index, 1);
-        }
+        this.processes.delete(uid);
     }
+
 
     /** Close tab */
 
     private removeTabEntry(uid: TerminalTabUid) {
-        const index = this.tabs.findIndex(i => i.uid === uid);
-        const founded = index !== -1;
-        if (founded) {
-            this.tabs.splice(index, 1);
-        }
+        this.tabs.delete(uid);
     }
 
     private killTerminalProcess(uid: TerminalTabUid) {
-        const index = this.processes.findIndex(i => i.uid === uid);
-        const founded = index !== -1;
+        const process = this.processes.get(uid);
+        const founded = !!process;
         if (founded) {
-            const process = this.processes[index];
             process.kill();
-            this.processes.splice(index, 1);
+            this.processes.delete(uid);
         }
     }
-
-
 
 }

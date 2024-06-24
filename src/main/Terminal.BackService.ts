@@ -109,7 +109,6 @@ export class TerminalBService {
     }
 
     private handleResize(uid: TerminalTabUid, cols: number, rows: number) {
-        console.log('resize', cols);
         this.terminalMng.resize(uid, cols, rows);
     }
 
@@ -123,7 +122,7 @@ export class TerminalBService {
     private sendTabs() {
         this.sendMsg({
             type: TerminalMsgType.TERMINAL_INSTANCES,
-            tabs: this.terminalMng.tabs
+            tabs: this.terminalMng.getTabsArr()
         });
     }
 
