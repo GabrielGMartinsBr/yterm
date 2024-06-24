@@ -15,6 +15,11 @@ export class TerminalsManager {
         this.processes = [];
     }
 
+    getProcess(uid: TerminalTabUid) {
+        const process = this.processes.find(i => i.uid === uid);
+        return process;
+    }
+
     createTab() {
         const process = new TerminalProcess(this.callbacks);
         const tab = {
@@ -39,7 +44,7 @@ export class TerminalsManager {
         process.write(data);
     }
 
-    resize(uid: TerminalTabUid, cols: number, rows: number) { 
+    resize(uid: TerminalTabUid, cols: number, rows: number) {
         const process = this.processes.find(i => i.uid === uid);
         if (!process) {
             throw new Error('Terminal process not found. Process UID: ' + uid);

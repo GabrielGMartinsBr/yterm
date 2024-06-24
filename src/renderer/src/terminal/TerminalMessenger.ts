@@ -20,15 +20,15 @@ export class TerminalMessenger {
 
     static send(uid: TerminalTabUid, key: string) {
         window.api.sendToTerminal({
-            uid: uid,
             type: TerminalMsgType.INPUT,
+            uid: uid,
             data: key
         });
     }
     static emitClear(uid: TerminalTabUid) {
         window.api.sendToTerminal({
-            uid: uid,
-            type: TerminalMsgType.CLEAR
+            type: TerminalMsgType.CLEAR,
+            uid: uid
         });
     }
 
@@ -38,6 +38,21 @@ export class TerminalMessenger {
             uid: uid,
             cols: cols,
             rows: rows
+        });
+    }
+
+    static requestCopy(uid: TerminalTabUid, data: string) {
+        window.api.sendToTerminal({
+            type: TerminalMsgType.COPY,
+            uid: uid,
+            data: data
+        });
+    }
+
+    static requestPaste(uid: TerminalTabUid) {
+        window.api.sendToTerminal({
+            type: TerminalMsgType.PASTE,
+            uid: uid
         });
     }
 

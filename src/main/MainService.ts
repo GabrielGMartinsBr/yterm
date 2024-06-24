@@ -1,7 +1,6 @@
-import { BrowserWindow, clipboard, ipcMain } from 'electron';
+import { BrowserWindow, ipcMain } from 'electron';
 import { IpcChannel } from '@common/IpcDefinitions';
 import { MainServiceMsg, MainServiceMsgType } from '@common/ipcMsgs/MainServiceMsgs';
-import { TerminalBService } from './Terminal.BackService';
 
 export class MainService {
 
@@ -51,14 +50,6 @@ export class MainService {
 
     private handleMessage(msg: MainServiceMsg) {
         switch (msg.type) {
-            case MainServiceMsgType.COPY: {
-                clipboard.writeText(msg.data, 'clipboard');
-                break;
-            }
-            case MainServiceMsgType.REQUEST_PASTE: {
-                this.sendPasteData();
-                break;
-            }
             case MainServiceMsgType.MINIMIZE: {
                 this.minimize();
                 break;
@@ -72,22 +63,6 @@ export class MainService {
                 break;
             }
         }
-    }
-
-    // private sendToRenderer(msg: MainServiceMsg) {
-    //     if (!this.mainWindow) {
-    //         throw new Error('MainWindow was not defined on MainService.');
-    //     }
-    //     this.mainWindow.webContents.send(IpcChannel.MAIN, msg);
-    // }
-
-    private sendPasteData() {
-        const data = clipboard.readText('selection');
-        // this.sendToRenderer({
-        //     type: MainServiceMsgType.PASTE,
-        //     data
-        // });
-        TerminalBService.getInstance().tInstance!.write(data);
     }
 
     private minimize() {

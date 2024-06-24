@@ -10,13 +10,18 @@ import { TerminalMessenger } from './terminal/TerminalMessenger';
 import { useIpcMessage } from './hooks/useIpcMessage';
 import { TerminalMsg, TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
 import { useRefSet4 } from './hooks/useRefSet4';
+import { useRefSet3 } from './hooks/useRefSet3';
 
 export default function AppCtrl(props: PropsWithChildren) {
-    const [tabs, tabsUpdate] = useImmer<TerminalTab[]>([]);
-    const [selectedTab, selectedTabSet] = useState<SelectedTab>(null);
+    const refs = useRefSet3(class {
+        tabs: TerminalTab[] = [];
+    });
     const wrapRefSet = useRefSet4<HTMLDivElement | null>();
     const termRefSet = useRefSet4<Terminal | null>();
     const fitAddonRefSet = useRefSet4<FitAddon | null>();
+    
+    const [tabs, tabsUpdate] = useImmer<TerminalTab[]>([]);
+    const [selectedTab, selectedTabSet] = useState<SelectedTab>(null);
 
     const createTab = () => {
         // const newTabUid = nanoid();
@@ -56,7 +61,7 @@ export default function AppCtrl(props: PropsWithChildren) {
     const handleTerminalMsg = (msg: TerminalMsg) => {
         switch (msg.type) {
             case TerminalMsgType.TERMINAL_INSTANCES: {
-                tabsUpdate(msg.tabs);
+                handleTabs(msg.tabs);
                 break;
             }
             case TerminalMsgType.OUTPUT: {
@@ -67,6 +72,11 @@ export default function AppCtrl(props: PropsWithChildren) {
                 console.log(msg);
             }
         }
+    };
+
+    const handleTabs = (tabs: TerminalTab[]) => { 
+        refs.tabs = tabs;
+        tabsUpdate(refs.tabs);
     };
 
     const handleOutput = (uid: TerminalTabUid, data: string) => {
@@ -97,11 +107,45 @@ export default function AppCtrl(props: PropsWithChildren) {
                 v?.fit();
             });
         };
+        const handleKeyDown = (e: KeyboardEvent) => {
+            handleWindowKeyDown(e);
+        };
         window.addEventListener('resize', handleResize);
+        window.addEventListener('keydown', handleKeyDown);
         return () => {
             window.removeEventListener('resize', handleResize);
+            window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
+
+    function handleWindowKeyDown(e: KeyboardEvent) {
+        if (!e.shiftKey || !e.ctrlKey) {
+            return;
+        }
+        switch (e.code) {
+            case 'KeyC':
+                requestCopy();
+                break;
+            case 'KeyV':
+                requestPaste();
+                break;
+        }
+    }
+
+    function requestCopy() {
+        const tab = refs.tabs[0];
+        const term = termRefSet.get(tab.uid);
+        if (!term) {
+            throw new Error('Selected tab terminal was not found.');
+        }
+        const selection = term.getSelection();
+        TerminalMessenger.requestCopy(tab.uid, selection);
+    }
+
+    function requestPaste() {
+        const tab = refs.tabs[0];
+        TerminalMessenger.requestPaste(tab.uid);
+    }
 
     return (
         <appContext.Provider value={{

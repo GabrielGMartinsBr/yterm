@@ -21,8 +21,6 @@ export default function TerminalTabFront(props: Props) {
             return;
         }
 
-        wrap.textContent = props.uid;
-
         const term = new Terminal({
             allowTransparency: true,
             cols: 80,
@@ -38,10 +36,6 @@ export default function TerminalTabFront(props: Props) {
                 fullscreenWin: true,
             },
         });
-
-        term.onBinary(a => {
-            console.log(a);
-        })
 
         const fitAddon = new FitAddon();
         term.loadAddon(fitAddon);
@@ -78,9 +72,6 @@ export default function TerminalTabFront(props: Props) {
                 emitClear();
             }
         })
-
-        console.log(wrapRefSet.getObjectMap());
-        console.log(termRefSet.getObjectMap());
 
         return () => {
             term.dispose();

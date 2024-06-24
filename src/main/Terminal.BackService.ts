@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain } from 'electron';
+import { BrowserWindow, clipboard, ipcMain } from 'electron';
 import { IpcChannel } from '@common/IpcDefinitions';
 import { TerminalMsg, TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
 import { TerminalOutput } from '@common/types/TerminalOutput';
@@ -78,6 +78,14 @@ export class TerminalBService {
                 this.handleWrite(msg.uid, msg.data);
                 break;
             }
+            case TerminalMsgType.COPY: {
+                this.clipboardCopy(msg.data);
+                break;
+            }
+            case TerminalMsgType.PASTE: {
+                this.clipboardPaste(msg.uid);
+                break;
+            }
             case TerminalMsgType.RESIZE: {
                 this.handleResize(msg.uid, msg.cols, msg.rows);
                 break;
@@ -131,5 +139,18 @@ export class TerminalBService {
 
     private sendMsg(msg: TerminalMsg) {
         this.mainWindow!.webContents.send(IpcChannel.TERMINAL, msg);
+    }
+
+    private clipboardCopy(data: string) {
+        clipboard.writeText(data, 'clipboard');
+    }
+
+    private clipboardPaste(uid: TerminalTabUid) {
+        const data = clipboard.readText('selection');
+        const process = this.terminalMng.getProcess(uid);
+        if (!process) {
+            throw new Error('Terminal process was not found. Process UID: ' + uid);
+        }
+        process.write(data);
     }
 }
