@@ -3,16 +3,18 @@ import { TerminalTab, TerminalTabUid } from '@common/types/TerminalTab';
 import { TerminalProcess } from './TerminalProcess';
 
 interface Callbacks {
+    onProcessExit: () => void;
     sendOutput: (output: TerminalOutput) => void;
 }
 
 export class TerminalsManager {
     tabs: TerminalTab[];
-    processes: TerminalProcess[];
+    private processes: TerminalProcess[];
 
     constructor(private callbacks: Callbacks) {
         this.tabs = [];
         this.processes = [];
+        this.handleProcessExit = this.handleProcessExit.bind(this);
     }
 
     getProcess(uid: TerminalTabUid) {
@@ -20,8 +22,15 @@ export class TerminalsManager {
         return process;
     }
 
+    hasOpenedProcesses() {
+        return this.processes.length > 0;
+    }
+
     createTab() {
-        const process = new TerminalProcess(this.callbacks);
+        const process = new TerminalProcess({
+            ...this.callbacks,
+            onExit: this.handleProcessExit
+        });
         const tab = {
             uid: process.uid
         };
@@ -50,6 +59,25 @@ export class TerminalsManager {
         process.resize(cols, rows);
     }
 
+
+    /** Process exit */
+
+    private handleProcessExit(uid: TerminalTabUid) {
+        this.removeTabEntry(uid);
+        this.removeProcess(uid);
+        this.callbacks.onProcessExit();
+    }
+
+    private removeProcess(uid: TerminalTabUid) {
+        const index = this.processes.findIndex(i => i.uid === uid);
+        const founded = index !== -1;
+        if (founded) {
+            this.processes.splice(index, 1);
+        }
+    }
+
+    /** Close tab */
+
     private removeTabEntry(uid: TerminalTabUid) {
         const index = this.tabs.findIndex(i => i.uid === uid);
         const founded = index !== -1;
@@ -66,7 +94,8 @@ export class TerminalsManager {
             process.kill();
             this.processes.splice(index, 1);
         }
-
     }
+
+
 
 }

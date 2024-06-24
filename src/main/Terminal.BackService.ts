@@ -1,4 +1,4 @@
-import { BrowserWindow, clipboard, ipcMain } from 'electron';
+import { BrowserWindow, app, clipboard, ipcMain } from 'electron';
 import { IpcChannel } from '@common/IpcDefinitions';
 import { TerminalMsg, TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
 import { TerminalOutput } from '@common/types/TerminalOutput';
@@ -31,8 +31,10 @@ export class TerminalBService {
 
     private constructor() {
         this.initialized = false;
+        this.handleProcessExit = this.handleProcessExit.bind(this);
         this.sendOutput = this.sendOutput.bind(this);
         this.terminalMng = new TerminalsManager({
+            onProcessExit: this.handleProcessExit,
             sendOutput: this.sendOutput
         });
     }
@@ -109,6 +111,13 @@ export class TerminalBService {
     private handleResize(uid: TerminalTabUid, cols: number, rows: number) {
         console.log('resize', cols);
         this.terminalMng.resize(uid, cols, rows);
+    }
+
+    private handleProcessExit() {
+        this.sendTabs();
+        if (!this.terminalMng.hasOpenedProcesses()) {
+            app.quit();
+        }
     }
 
     private sendTabs() {

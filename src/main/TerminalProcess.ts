@@ -2,8 +2,10 @@ import os from 'node:os';
 import { nanoid } from 'nanoid';
 import pty from 'node-pty';
 import { TerminalOutput } from '@common/types/TerminalOutput';
+import { TerminalTabUid } from '@common/types/TerminalTab';
 
 interface Callbacks {
+    onExit: (uid: TerminalTabUid) => void;
     sendOutput: (output: TerminalOutput) => void;
 }
 
@@ -17,6 +19,7 @@ export class TerminalProcess {
     private pwd: string;
     private process: pty.IPty;
     private isSetupComplete: boolean;
+    private isExited: boolean;
     private lastData: string;
 
     constructor(private callbacks: Callbacks) {
@@ -25,7 +28,9 @@ export class TerminalProcess {
         this.process = this.createProcess();
         this.lastData = '';
         this.isSetupComplete = false;
+        this.isExited = false;
         this.setup();
+        this.bindCloseEvent();
     }
 
     static newInstance(callbacks: Callbacks) {
@@ -34,6 +39,7 @@ export class TerminalProcess {
     }
 
     write(cmd: string) {
+        this.throwErrorIfIsExited();
         this.process.write(cmd);
     }
 
@@ -42,6 +48,7 @@ export class TerminalProcess {
     }
 
     resize(cols: number, rows: number) {
+        this.throwErrorIfIsExited();
         this.process.resize(cols, rows);
     }
 
@@ -68,6 +75,13 @@ export class TerminalProcess {
         this.process.write(`echo "${setupCompleteMarker}"\n`);
     }
 
+    private bindCloseEvent() {
+        this.process.onExit(() => {
+            this.isExited = true;
+            this.callbacks.onExit(this.uid);
+        });
+    }
+
     private handleTerminalData(data: string) {
         const result = dirMarkerRegex.exec(data);
         if (result) {
@@ -92,12 +106,17 @@ export class TerminalProcess {
     }
 
     private sendOutput(data: string) {
-        console.log(data);
         this.callbacks.sendOutput({
             uid: this.uid,
             pwd: this.pwd,
             data
         });
+    }
+
+    private throwErrorIfIsExited() {
+        if (this.isExited) {
+            throw new Error('Terminal process is exited.');
+        }
     }
 
 }
