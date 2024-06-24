@@ -167,22 +167,24 @@ export default function TerminalMain() {
 
     function send(key: string) {
         window.api.sendToTerminal({
+            uid: '',
             type: TerminalMsgType.INPUT,
             data: key
         });
     }
 
     function emitResize(cols: number, rows: number) {
-        window.api.sendToTerminal({
-            type: TerminalMsgType.RESIZE,
-            cols: cols,
-            rows: rows
-        });
+        // window.api.sendToTerminal({
+        //     type: TerminalMsgType.RESIZE,
+        //     cols: cols,
+        //     rows: rows
+        // });
     }
 
     function emitClear() {
         refs.term!.clear();
         window.api.sendToTerminal({
+            uid: '',
             type: TerminalMsgType.CLEAR
         });
     }

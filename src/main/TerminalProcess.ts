@@ -11,7 +11,7 @@ const dirMarkerRegex = /^DIR_MARKER:(.*)$\r\n/gm;
 const setupCompleteMarker = 'SETUP_COMPLETE';
 const setupCompleteMarkerRegex = /^SETUP_COMPLETE\r$/gm;
 
-export class TerminalInstance {
+export class TerminalProcess {
     readonly uid: string;
 
     private pwd: string;
@@ -26,6 +26,11 @@ export class TerminalInstance {
         this.lastData = '';
         this.isSetupComplete = false;
         this.setup();
+    }
+
+    static newInstance(callbacks: Callbacks) {
+        const instance = new TerminalProcess(callbacks);
+        return instance;
     }
 
     write(cmd: string) {
@@ -83,6 +88,7 @@ export class TerminalInstance {
     }
 
     private sendOutput(data: string) {
+        console.log(data);
         this.callbacks.sendOutput({
             uid: this.uid,
             pwd: this.pwd,

@@ -1,8 +1,9 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import { IpcChannel } from '@common/IpcDefinitions';
 import { TerminalMsg, TerminalMsgType } from '@common/ipcMsgs/TerminalMsgs';
-import { TerminalInstance } from './TerminalInstance';
 import { TerminalOutput } from '@common/types/TerminalOutput';
+import { TerminalTabUid } from '@common/types/TerminalTab';
+import { TerminalsManager } from './TerminalsManager';
 
 
 export class TerminalBService {
@@ -26,11 +27,14 @@ export class TerminalBService {
 
     private initialized: boolean;
     private mainWindow?: BrowserWindow;
-    tInstance?: TerminalInstance;
+    private terminalMng: TerminalsManager;
 
     private constructor() {
         this.initialized = false;
         this.sendOutput = this.sendOutput.bind(this);
+        this.terminalMng = new TerminalsManager({
+            sendOutput: this.sendOutput
+        });
     }
 
     private init(mainWindow: BrowserWindow) {
@@ -40,16 +44,6 @@ export class TerminalBService {
         this.mainWindow = mainWindow;
         this.initialized = true;
         this.listenIPC();
-    }
-
-    private createInstance() {
-        if (this.tInstance) {
-            return;
-        }
-        const instance = new TerminalInstance({
-            sendOutput: this.sendOutput
-        });
-        this.tInstance = instance;
     }
 
     private listenIPC() {
@@ -62,23 +56,30 @@ export class TerminalBService {
     }
 
     private handleMessage(msg: TerminalMsg) {
-        if (!this.tInstance) {
-            this.createInstance();
-        }
-        if (!this.tInstance) {
-            throw new Error('Create terminal instance failed.');
-        }
         switch (msg.type) {
-            case TerminalMsgType.INIT: {
-                this.tInstance.sendLastOutput();
+            case TerminalMsgType.FETCH_TABS: {
+                this.sendTabs();
                 break;
             }
+            case TerminalMsgType.CREATE_TAB: {
+                this.createTab();
+                break;
+            }
+            case TerminalMsgType.CLOSE_TAB: {
+                this.closeTab(msg.uid);
+                break;
+            }
+
+            // case TerminalMsgType.INIT: {
+            //     this.tInstance.sendLastOutput();
+            //     break;
+            // }
             case TerminalMsgType.INPUT: {
-                this.tInstance.write(msg.data);
+                this.handleWrite(msg.uid, msg.data);
                 break;
             }
             case TerminalMsgType.RESIZE: {
-                this.tInstance.resize(msg.cols,msg.rows);
+                this.handleResize(msg.uid, msg.cols, msg.rows);
                 break;
             }
             case TerminalMsgType.CLEAR: {
@@ -91,6 +92,32 @@ export class TerminalBService {
                 break;
             }
         }
+    }
+
+    private handleWrite(uid: TerminalTabUid, data: string) {
+        this.terminalMng.write(uid, data);
+    }
+
+    private handleResize(uid: TerminalTabUid, cols: number, rows: number) {
+        console.log('resize', cols);
+        this.terminalMng.resize(uid, cols, rows);
+    }
+
+    private sendTabs() {
+        this.sendMsg({
+            type: TerminalMsgType.TERMINAL_INSTANCES,
+            tabs: this.terminalMng.tabs
+        });
+    }
+
+    private createTab() {
+        this.terminalMng.createTab();
+        this.sendTabs();
+    }
+
+    private closeTab(uid: TerminalTabUid) {
+        this.terminalMng.closeTab(uid);
+        this.sendTabs();
     }
 
     private sendOutput(output: TerminalOutput) {
