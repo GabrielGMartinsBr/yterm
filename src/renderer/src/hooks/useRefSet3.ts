@@ -1,11 +1,6 @@
 import { useRef } from 'react';
 import { GenericListener, GenericListenerCb } from './utils/GenericListener';
 
-interface Constructable<T> {
-    new(...args: any[]): T;
-}
-
-type ClassConstructor<T> = new (...args: any[]) => T;
 
 type IRefSet3<T> = T & {
     get<K extends keyof T>(k: K): T[K];
@@ -15,14 +10,15 @@ type IRefSet3<T> = T & {
     listenChanges(cb: GenericListenerCb): () => void;
 }
 
-function createRefSet<T>(constructor: Constructable<T>) {
-    type RefVal = any;
+type Constructable<T> = new (...args: unknown[]) => T;
 
-    class RefSet3<T> extends (constructor as Constructable<RefVal>) {
-        private setterMap = new Map<keyof T, any>();
+function createRefSet<T>(constructor: Constructable<T>) {
+
+    class RefSet3<T> extends (constructor as Constructable<NonNullable<unknown>>) {
+        private setterMap = new Map<keyof T, unknown>();
         private listeners = new GenericListener();
 
-        constructor(...args: any[]) {
+        constructor(...args: unknown[]) {
             super(...args);
         }
 
@@ -39,7 +35,7 @@ function createRefSet<T>(constructor: Constructable<T>) {
         }
 
         set<K extends keyof T>(k: K, v: T[K]) {
-            this[k as any] = v;
+            this[k as string] = v;
             this.listeners.emit();
         }
 
@@ -70,10 +66,10 @@ function createRefSet<T>(constructor: Constructable<T>) {
 
 export type RefSet3<T> = IRefSet3<T>;
 
-export function useRefSet3<T>(constructor: ClassConstructor<T>) {
+export function useRefSet3<T>(constructor: Constructable<T>) {
     const ref = useRef<null | RefSet3<T>>(null);
     if (ref.current === null) {
-        ref.current = createRefSet(constructor);
+        ref.current = createRefSet(constructor) as RefSet3<T>;
     }
     return ref.current;
 }
