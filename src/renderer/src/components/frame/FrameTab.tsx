@@ -38,7 +38,7 @@ export default function FrameTab(props: Props) {
           ${isSelected ? 'text-white font-semibold' : ''}
         }`}
       >
-        {props.tab.pwd}
+        {props.tab.cwd}
       </h3>
 
       <button

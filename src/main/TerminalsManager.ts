@@ -1,6 +1,7 @@
 import { TerminalOutput } from '@common/types/TerminalOutput';
 import { TerminalTab, TerminalTabUid } from '@common/types/TerminalTab';
 import { TerminalProcess } from './TerminalProcess';
+import { AppStorage } from './AppStorage';
 
 interface Callbacks {
     onProcessExit: () => void;
@@ -20,7 +21,14 @@ export class TerminalsManager {
         this.processes = new Map();
         this.selectedTab = null;
         this.handleProcessExit = this.handleProcessExit.bind(this);
-        this.handlePwdChange = this.handlePwdChange.bind(this);
+        this.handleCwdChange = this.handleCwdChange.bind(this);
+    }
+
+    async init() {
+        const restored = await this.restorePreviousSession();
+        if (!restored) {
+            this.createNewSession();
+        }
     }
 
     getProcess(uid: TerminalTabUid) {
@@ -41,28 +49,31 @@ export class TerminalsManager {
     }
 
     createTab() {
-        const process = new TerminalProcess({
+        const process = TerminalProcess.newInstance({
             ...this.callbacks,
             onExit: this.handleProcessExit,
-            onPwdChange: this.handlePwdChange
+            onCwdChange: this.handleCwdChange
         });
         const tab: TerminalTab = {
             uid: process.uid,
-            pwd: process.getPwd()
+            cwd: process.getCwd()
         };
         this.tabs.push(tab);
         this.tabsMap.set(process.uid, tab);
         this.processes.set(process.uid, process);
         this.selectTab(process.uid);
+        this.saveSession();
     }
 
     selectTab(uid: TerminalTabUid) {
         this.selectedTab = uid;
+        this.saveSession();
     }
 
     closeTab(uid: TerminalTabUid) {
         this.removeTabEntry(uid);
         this.killTerminalProcess(uid);
+        this.saveSession();
     }
 
     write(uid: TerminalTabUid, data: string) {
@@ -81,14 +92,15 @@ export class TerminalsManager {
         process.resize(cols, rows);
     }
 
-    private handlePwdChange(uid: TerminalTabUid, pwd: string) {
+    private handleCwdChange(uid: TerminalTabUid, cwd: string) {
         const tab = this.tabsMap.get(uid);
         if (!tab) {
             console.error('Not found tab uid:', uid);
             throw new Error('Terminal tab reference was not found on tabsMap.');
         }
-        tab.pwd = pwd;
+        tab.cwd = cwd;
         this.callbacks.onTabChange();
+        this.saveSession();
     }
 
 
@@ -139,6 +151,58 @@ export class TerminalsManager {
         if (nextTab) {
             this.selectTab(nextTab.uid);
         }
+    }
+
+
+    /** Save and Restore previous sessions */
+
+    private saveSession() {
+        const tabs = this.tabs;
+        const selectedTab = this.selectedTab;
+        AppStorage.save({
+            tabs,
+            selectedTab
+        });
+    }
+
+    private async restorePreviousSession() {
+        const previous = await AppStorage.load();
+        if (!previous?.tabs.length) {
+            return false;
+        }
+        for (const tab of previous.tabs) {
+            this.restoreTab(tab);
+        }
+        if (previous.selectedTab) {
+            this.selectedTab = previous.selectedTab;
+        } else {
+            this.selectedTab = previous.tabs[0].uid;
+        }
+        return true;
+    }
+
+    private createNewSession() {
+        this.createTab();
+        const tab = this.getTabsArr()[0];
+        if (!tab) {
+            throw new Error('Failed to create first tab.');
+        }
+        this.selectTab(tab.uid);
+    }
+
+    private restoreTab(_tab: TerminalTab) {
+        const tab: TerminalTab = {
+            uid: _tab.uid,
+            cwd: _tab.cwd
+        };
+        const process = TerminalProcess.restoreInstance(tab, {
+            ...this.callbacks,
+            onExit: this.handleProcessExit,
+            onCwdChange: this.handleCwdChange
+        })
+        this.tabs.push(tab);
+        this.tabsMap.set(process.uid, tab);
+        this.processes.set(process.uid, process);
     }
 
 }

@@ -48,7 +48,7 @@ export class TerminalBService {
         this.mainWindow = mainWindow;
         this.initialized = true;
         this.listenIPC();
-        this.createFirstTab();
+        this.initSession();
     }
 
     private listenIPC() {
@@ -134,13 +134,8 @@ export class TerminalBService {
         }
     }
 
-    private createFirstTab() {
-        this.terminalMng.createTab();
-        const tab = this.terminalMng.getTabsArr()[0];
-        if (!tab) {
-            throw new Error('Failed to create first tab.');
-        }
-        this.terminalMng.selectTab(tab.uid);
+    private async initSession() {
+        await this.terminalMng.init();
         this.sendTabs();
         this.sendSelectedTab();
     }
@@ -180,7 +175,7 @@ export class TerminalBService {
         this.sendMsg({
             type: TerminalMsgType.OUTPUT,
             uid: output.uid,
-            pwd: output.pwd,
+            cwd: output.cwd,
             data: output.data
         });
     }

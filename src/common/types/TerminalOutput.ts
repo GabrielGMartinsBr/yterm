@@ -1,5 +1,5 @@
 export interface TerminalOutput {
     uid: string;
-    pwd: string;
+    cwd: string | undefined;
     data: string;
 }

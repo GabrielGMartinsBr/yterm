@@ -2,12 +2,12 @@ import os from 'node:os';
 import { nanoid } from 'nanoid';
 import pty from 'node-pty';
 import { TerminalOutput } from '@common/types/TerminalOutput';
-import { TerminalTabUid } from '@common/types/TerminalTab';
+import { TerminalTab, TerminalTabUid } from '@common/types/TerminalTab';
 
 interface Callbacks {
     onExit: (uid: TerminalTabUid) => void;
     sendOutput: (output: TerminalOutput) => void;
-    onPwdChange: (uid: TerminalTabUid, pwd: string) => void;
+    onCwdChange: (uid: TerminalTabUid, cwd: string) => void;
 }
 
 const dirMarkerRegex = /^DIR_MARKER:(.*)$\r\n/gm;
@@ -17,15 +17,13 @@ const setupCompleteMarkerRegex = /^SETUP_COMPLETE\r$/gm;
 export class TerminalProcess {
     readonly uid: string;
 
-    private pwd: string;
     private process: pty.IPty;
     private isSetupComplete: boolean;
     private isExited: boolean;
     private lastData: string;
 
-    constructor(private callbacks: Callbacks) {
-        this.uid = nanoid();
-        this.pwd = '';
+    constructor(uid: TerminalTabUid, private cwd: string | undefined, private callbacks: Callbacks) {
+        this.uid = uid;
         this.process = this.createProcess();
         this.lastData = '';
         this.isSetupComplete = false;
@@ -35,12 +33,19 @@ export class TerminalProcess {
     }
 
     static newInstance(callbacks: Callbacks) {
-        const instance = new TerminalProcess(callbacks);
+        const uid = nanoid();
+        const cwd = process.env.HOME;
+        const instance = new TerminalProcess(uid, cwd, callbacks);
         return instance;
     }
 
-    getPwd() {
-        return this.pwd;
+    static restoreInstance(tab: TerminalTab, callbacks: Callbacks) {
+        const instance = new TerminalProcess(tab.uid, tab.cwd, callbacks);
+        return instance;
+    }
+
+    getCwd() {
+        return this.cwd;
     }
 
     write(cmd: string) {
@@ -67,7 +72,7 @@ export class TerminalProcess {
             name: 'xterm-color',
             cols: 80,
             rows: 30,
-            cwd: process.env.HOME,
+            cwd: this.cwd || undefined,
             env: process.env,
         });
     }
@@ -90,7 +95,7 @@ export class TerminalProcess {
     private handleTerminalData(data: string) {
         const result = dirMarkerRegex.exec(data);
         if (result) {
-            this.handlePwd(result[1]);
+            this.handleCwd(result[1]);
             data = data.replace(dirMarkerRegex, '');
         }
 
@@ -110,18 +115,18 @@ export class TerminalProcess {
         this.sendOutput(data);
     }
 
-    private handlePwd(pwd: string) {
-        if (this.pwd === pwd) {
+    private handleCwd(cdw: string) {
+        if (this.cwd === cdw) {
             return;
         }
-        this.pwd = pwd;
-        this.callbacks.onPwdChange(this.uid, this.pwd);
+        this.cwd = cdw;
+        this.callbacks.onCwdChange(this.uid, this.cwd);
     }
 
     private sendOutput(data: string) {
         this.callbacks.sendOutput({
             uid: this.uid,
-            pwd: this.pwd,
+            cwd: this.cwd,
             data
         });
     }

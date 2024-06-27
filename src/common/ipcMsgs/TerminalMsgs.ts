@@ -68,7 +68,7 @@ export interface TerminalMsgTypes {
     Output: {
         type: TerminalMsgType.OUTPUT;
         uid: string;
-        pwd: string;
+        cwd: string | undefined;
         data: string;
     }
 
