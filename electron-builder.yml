@@ -1,5 +1,5 @@
 appId: dev.gabrielmartins.app.yterm
-productName: yterm
+productName: Yterm
 directories:
   buildResources: build
 files:
@@ -33,11 +33,6 @@ linux:
     - AppImage
     - snap
     - deb
-    - pacman
-  maintainer: gabrielmartins.dev
-  category: Utility
-linux-dev:
-  target:
     - pacman
   maintainer: gabrielmartins.dev
   category: Utility
