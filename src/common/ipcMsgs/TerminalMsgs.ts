@@ -4,6 +4,7 @@ export enum TerminalMsgType {
     TABS = '[TerminalMsg] - TABS',
     SELECTED_TAB = '[TerminalMsg] - SELECTED_TAB',
 
+    INIT_FETCH = '[TerminalMsg] - INIT_FETCH',
     FETCH_TABS = '[TerminalMsg] - FETCH_TABS',
     CREATE_TAB = '[TerminalMsg] - CREATE_TAB',
     SELECT_TAB = '[TerminalMsg] - SELECT_TAB',
@@ -11,7 +12,6 @@ export enum TerminalMsgType {
     COPY = '[TerminalMsg] - COPY',
     PASTE = '[TerminalMsg] - PASTE',
 
-    INIT = '[TerminalMsg] - INIT',
     INPUT = '[TerminalMsg] - INPUT',
     OUTPUT = '[TerminalMsg] - OUTPUT',
     RESIZE = '[TerminalMsg] - RESIZE',
@@ -28,6 +28,10 @@ export interface TerminalMsgTypes {
     SelectedTab: {
         type: TerminalMsgType.SELECTED_TAB;
         uid: TerminalTabUid | null;
+    }
+
+    InitFetch: {
+        type: TerminalMsgType.INIT_FETCH;
     }
 
     FetchTabs: { type: TerminalMsgType.FETCH_TABS; }
@@ -53,10 +57,6 @@ export interface TerminalMsgTypes {
     Paste: {
         type: TerminalMsgType.PASTE;
         uid: TerminalTabUid;
-    }
-
-    Init: {
-        type: TerminalMsgType.INIT;
     }
 
     Input: {

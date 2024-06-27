@@ -3,6 +3,10 @@ import { TerminalTabUid } from '@common/types/TerminalTab';
 
 export class TerminalMessenger {
 
+    static initFetch() {
+        window.api.sendToTerminal({ type: TerminalMsgType.INIT_FETCH });
+    }
+
     static fetchTabs() {
         window.api.sendToTerminal({ type: TerminalMsgType.FETCH_TABS });
     }

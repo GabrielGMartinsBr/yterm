@@ -129,9 +129,9 @@ export default function TerminalMain() {
         if (!msg?.type) {
             throw new Error('Invalid main service msg received.');
         }
-        if (msg.type === MainServiceMsgType.PASTE) {
-            refs.term!.write(msg.data);
-        }
+        // if (msg.type === MainServiceMsgType.PASTE) {
+        //     refs.term!.write(msg.data);
+        // }
     });
 
     useEffect(() => {
@@ -161,7 +161,7 @@ export default function TerminalMain() {
 
     function emitInit() {
         window.api.sendToTerminal({
-            type: TerminalMsgType.INIT
+            type: TerminalMsgType.INIT_FETCH
         });
     }
 

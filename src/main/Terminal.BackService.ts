@@ -48,6 +48,7 @@ export class TerminalBService {
         this.mainWindow = mainWindow;
         this.initialized = true;
         this.listenIPC();
+        this.createFirstTab();
     }
 
     private listenIPC() {
@@ -61,6 +62,12 @@ export class TerminalBService {
 
     private handleMessage(msg: TerminalMsg) {
         switch (msg.type) {
+            case TerminalMsgType.INIT_FETCH: {
+                this.sendTabs();
+                this.sendSelectedTab();
+                // this.tInstance.sendLastOutput();
+                break;
+            }
             case TerminalMsgType.FETCH_TABS: {
                 this.sendTabs();
                 break;
@@ -78,10 +85,6 @@ export class TerminalBService {
                 break;
             }
 
-            // case TerminalMsgType.INIT: {
-            //     this.tInstance.sendLastOutput();
-            //     break;
-            // }
             case TerminalMsgType.INPUT: {
                 this.handleWrite(msg.uid, msg.data);
                 break;
@@ -127,6 +130,17 @@ export class TerminalBService {
         if (!this.terminalMng.hasOpenedProcesses()) {
             app.quit();
         }
+    }
+
+    private createFirstTab() {
+        this.terminalMng.createTab();
+        const tab = this.terminalMng.getTabsArr()[0];
+        if (!tab) {
+            throw new Error('Failed to create first tab.');
+        }
+        this.terminalMng.selectTab(tab.uid);
+        this.sendTabs();
+        this.sendSelectedTab();
     }
 
     private sendTabs() {

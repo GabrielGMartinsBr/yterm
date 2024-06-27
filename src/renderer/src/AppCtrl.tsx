@@ -84,6 +84,10 @@ export default function AppCtrl(props: PropsWithChildren) {
             process.write(data);
         }
 
+        initFetch() {
+            TerminalMessenger.initFetch();
+        }
+
         createTab() {
             TerminalMessenger.createTab();
         };
@@ -149,7 +153,7 @@ export default function AppCtrl(props: PropsWithChildren) {
 
 
     useEffect(() => {
-        TerminalMessenger.fetchTabs();
+        TerminalMessenger.initFetch();
     }, []);
 
     useEffect(() => {
