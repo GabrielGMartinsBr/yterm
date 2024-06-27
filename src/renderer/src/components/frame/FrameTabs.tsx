@@ -21,17 +21,27 @@ export default function FrameTabs() {
     return (
         <div
             className={`@tw{
+                flex-1
                 flex flex-row gap-2 px-2
-            }`}
-        >
-            {tabs.map(i => (
-                <FrameTab
-                    key={i.uid}
-                    tab={i}
-                    onClick={() => handleSelectTab(i.uid)}
-                    onClose={() => handleCloseTab(i.uid)}
-                />
-            ))}
+                overflow-hidden
+                }`}
+                >
+            <div
+                className={`@tw{
+                    flex flex-row gap-2 
+                    overflow-x-auto
+                    scrollbar-none
+                }`}
+            >
+                {tabs.map(i => (
+                    <FrameTab
+                        key={i.uid}
+                        tab={i}
+                        onClick={() => handleSelectTab(i.uid)}
+                        onClose={() => handleCloseTab(i.uid)}
+                    />
+                ))}
+            </div>
 
             <FrameNewTabButton
                 onClick={handleAddTab}

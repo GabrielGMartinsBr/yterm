@@ -33,9 +33,11 @@ export class TerminalBService {
         this.initialized = false;
         this.handleProcessExit = this.handleProcessExit.bind(this);
         this.sendOutput = this.sendOutput.bind(this);
+        this.handleTabChange = this.handleTabChange.bind(this);
         this.terminalMng = new TerminalsManager({
             onProcessExit: this.handleProcessExit,
-            sendOutput: this.sendOutput
+            sendOutput: this.sendOutput,
+            onTabChange: this.handleTabChange
         });
     }
 
@@ -106,6 +108,10 @@ export class TerminalBService {
                 break;
             }
         }
+    }
+
+    private handleTabChange() {
+        this.sendTabs();
     }
 
     private handleWrite(uid: TerminalTabUid, data: string) {

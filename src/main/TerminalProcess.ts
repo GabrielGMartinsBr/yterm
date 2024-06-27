@@ -7,6 +7,7 @@ import { TerminalTabUid } from '@common/types/TerminalTab';
 interface Callbacks {
     onExit: (uid: TerminalTabUid) => void;
     sendOutput: (output: TerminalOutput) => void;
+    onPwdChange: (uid: TerminalTabUid, pwd: string) => void;
 }
 
 const dirMarkerRegex = /^DIR_MARKER:(.*)$\r\n/gm;
@@ -36,6 +37,10 @@ export class TerminalProcess {
     static newInstance(callbacks: Callbacks) {
         const instance = new TerminalProcess(callbacks);
         return instance;
+    }
+
+    getPwd() {
+        return this.pwd;
     }
 
     write(cmd: string) {
@@ -85,7 +90,7 @@ export class TerminalProcess {
     private handleTerminalData(data: string) {
         const result = dirMarkerRegex.exec(data);
         if (result) {
-            this.pwd = result[1];
+            this.handlePwd(result[1]);
             data = data.replace(dirMarkerRegex, '');
         }
 
@@ -103,6 +108,14 @@ export class TerminalProcess {
 
         this.lastData += data;
         this.sendOutput(data);
+    }
+
+    private handlePwd(pwd: string) {
+        if (this.pwd === pwd) {
+            return;
+        }
+        this.pwd = pwd;
+        this.callbacks.onPwdChange(this.uid, this.pwd);
     }
 
     private sendOutput(data: string) {

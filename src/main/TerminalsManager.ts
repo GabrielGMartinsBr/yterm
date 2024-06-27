@@ -4,19 +4,23 @@ import { TerminalProcess } from './TerminalProcess';
 
 interface Callbacks {
     onProcessExit: () => void;
+    onTabChange: () => void;
     sendOutput: (output: TerminalOutput) => void;
 }
 
 export class TerminalsManager {
     private tabs: TerminalTab[];
+    private tabsMap: Map<TerminalTabUid, TerminalTab>;
     private processes: Map<TerminalTabUid, TerminalProcess>;
     private selectedTab: TerminalTabUid | null;
 
     constructor(private callbacks: Callbacks) {
         this.tabs = [];
+        this.tabsMap = new Map();
         this.processes = new Map();
         this.selectedTab = null;
         this.handleProcessExit = this.handleProcessExit.bind(this);
+        this.handlePwdChange = this.handlePwdChange.bind(this);
     }
 
     getProcess(uid: TerminalTabUid) {
@@ -39,13 +43,16 @@ export class TerminalsManager {
     createTab() {
         const process = new TerminalProcess({
             ...this.callbacks,
-            onExit: this.handleProcessExit
+            onExit: this.handleProcessExit,
+            onPwdChange: this.handlePwdChange
         });
-        const tab = {
-            uid: process.uid
+        const tab: TerminalTab = {
+            uid: process.uid,
+            pwd: process.getPwd()
         };
-        this.processes.set(process.uid, process);
         this.tabs.push(tab);
+        this.tabsMap.set(process.uid, tab);
+        this.processes.set(process.uid, process);
         this.selectTab(process.uid);
     }
 
@@ -74,6 +81,16 @@ export class TerminalsManager {
         process.resize(cols, rows);
     }
 
+    private handlePwdChange(uid: TerminalTabUid, pwd: string) {
+        const tab = this.tabsMap.get(uid);
+        if (!tab) {
+            console.error('Not found tab uid:', uid);
+            throw new Error('Terminal tab reference was not found on tabsMap.');
+        }
+        tab.pwd = pwd;
+        this.callbacks.onTabChange();
+    }
+
 
     /** Process exit */
 
@@ -96,6 +113,7 @@ export class TerminalsManager {
         if (founded) {
             this.tabs.splice(index, 1);
         }
+        this.tabsMap.delete(uid);
     }
 
     private killTerminalProcess(uid: TerminalTabUid) {
