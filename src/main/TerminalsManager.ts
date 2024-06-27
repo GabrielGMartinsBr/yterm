@@ -114,6 +114,9 @@ export class TerminalsManager {
             this.tabs.splice(index, 1);
         }
         this.tabsMap.delete(uid);
+        if (this.selectedTab === uid) {
+            this.selectNextTab(index);
+        }
     }
 
     private killTerminalProcess(uid: TerminalTabUid) {
@@ -122,6 +125,19 @@ export class TerminalsManager {
         if (founded) {
             process.kill();
             this.processes.delete(uid);
+        }
+    }
+
+    private selectNextTab(index: number) {
+        let nextTab = this.tabs[index];
+        if (!nextTab && index > 0) {
+            nextTab = this.tabs[index - 1];
+        }
+        if (!nextTab && index > 0) {
+            nextTab = this.tabs[0];
+        }
+        if (nextTab) {
+            this.selectTab(nextTab.uid);
         }
     }
 
