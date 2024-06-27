@@ -52,7 +52,6 @@ export default function FrameTab(props: Props) {
           active:opacity-50
           transition-[colors_opacity]
           cursor-default
-
         }`}
       >
         <FaTimes />

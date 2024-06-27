@@ -101,7 +101,7 @@ export default function TerminalTabFront(props: Props) {
         <div
             ref={wrapRefSet.setter(props.uid)}
             className={`@tw{
-                y-term-wrap w-auto flex-1
+                y-term-wrap absolute inset-1
             }`}
         />
     )
