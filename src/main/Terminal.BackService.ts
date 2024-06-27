@@ -67,6 +67,10 @@ export class TerminalBService {
                 this.createTab();
                 break;
             }
+            case TerminalMsgType.SELECT_TAB: {
+                this.selectTab(msg.uid);
+                break;
+            }
             case TerminalMsgType.CLOSE_TAB: {
                 this.closeTab(msg.uid);
                 break;
@@ -121,19 +125,33 @@ export class TerminalBService {
 
     private sendTabs() {
         this.sendMsg({
-            type: TerminalMsgType.TERMINAL_INSTANCES,
+            type: TerminalMsgType.TABS,
             tabs: this.terminalMng.getTabsArr()
+        });
+    }
+
+    private sendSelectedTab() {
+        this.sendMsg({
+            type: TerminalMsgType.SELECTED_TAB,
+            uid: this.terminalMng.getSelectedTab()
         });
     }
 
     private createTab() {
         this.terminalMng.createTab();
         this.sendTabs();
+        this.sendSelectedTab();
+    }
+
+    private selectTab(uid: TerminalTabUid) {
+        this.terminalMng.selectTab(uid);
+        this.sendSelectedTab();
     }
 
     private closeTab(uid: TerminalTabUid) {
         this.terminalMng.closeTab(uid);
         this.sendTabs();
+        this.sendSelectedTab();
     }
 
     private sendOutput(output: TerminalOutput) {

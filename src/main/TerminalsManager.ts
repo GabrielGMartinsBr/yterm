@@ -8,12 +8,14 @@ interface Callbacks {
 }
 
 export class TerminalsManager {
-    private tabs: Map<TerminalTabUid, TerminalTab>;
+    private tabs: TerminalTab[];
     private processes: Map<TerminalTabUid, TerminalProcess>;
+    private selectedTab: TerminalTabUid | null;
 
     constructor(private callbacks: Callbacks) {
-        this.tabs = new Map();
+        this.tabs = [];
         this.processes = new Map();
+        this.selectedTab = null;
         this.handleProcessExit = this.handleProcessExit.bind(this);
     }
 
@@ -23,7 +25,11 @@ export class TerminalsManager {
     }
 
     getTabsArr() {
-        return Array.from(this.tabs.values());
+        return this.tabs;
+    }
+
+    getSelectedTab() {
+        return this.selectedTab;
     }
 
     hasOpenedProcesses() {
@@ -39,7 +45,12 @@ export class TerminalsManager {
             uid: process.uid
         };
         this.processes.set(process.uid, process);
-        this.tabs.set(process.uid, tab);
+        this.tabs.push(tab);
+        this.selectTab(process.uid);
+    }
+
+    selectTab(uid: TerminalTabUid) {
+        this.selectedTab = uid;
     }
 
     closeTab(uid: TerminalTabUid) {
@@ -80,7 +91,11 @@ export class TerminalsManager {
     /** Close tab */
 
     private removeTabEntry(uid: TerminalTabUid) {
-        this.tabs.delete(uid);
+        const index = this.tabs.findIndex(i => i.uid === uid);
+        const founded = index !== -1;
+        if (founded) {
+            this.tabs.splice(index, 1);
+        }
     }
 
     private killTerminalProcess(uid: TerminalTabUid) {

@@ -1,10 +1,12 @@
 import { TerminalTab, TerminalTabUid } from '@common/types/TerminalTab';
 
 export enum TerminalMsgType {
-    TERMINAL_INSTANCES = '[TerminalMsg] - TERMINAL_INSTANCES',
+    TABS = '[TerminalMsg] - TABS',
+    SELECTED_TAB = '[TerminalMsg] - SELECTED_TAB',
 
     FETCH_TABS = '[TerminalMsg] - FETCH_TABS',
     CREATE_TAB = '[TerminalMsg] - CREATE_TAB',
+    SELECT_TAB = '[TerminalMsg] - SELECT_TAB',
     CLOSE_TAB = '[TerminalMsg] - CLOSE_TAB',
     COPY = '[TerminalMsg] - COPY',
     PASTE = '[TerminalMsg] - PASTE',
@@ -18,14 +20,24 @@ export enum TerminalMsgType {
 };
 
 export interface TerminalMsgTypes {
-    TerminalInstances: {
-        type: TerminalMsgType.TERMINAL_INSTANCES;
+    Tabs: {
+        type: TerminalMsgType.TABS;
         tabs: TerminalTab[];
+    }
+
+    SelectedTab: {
+        type: TerminalMsgType.SELECTED_TAB;
+        uid: TerminalTabUid | null;
     }
 
     FetchTabs: { type: TerminalMsgType.FETCH_TABS; }
 
     CreateTab: { type: TerminalMsgType.CREATE_TAB; }
+
+    SelectTab: {
+        type: TerminalMsgType.SELECT_TAB;
+        uid: TerminalTabUid;
+    }
 
     CloseTab: {
         type: TerminalMsgType.CLOSE_TAB;

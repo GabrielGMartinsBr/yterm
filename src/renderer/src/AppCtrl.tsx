@@ -16,13 +16,14 @@ import { useInstanceRef } from './hooks/useInstanceRef';
 export default function AppCtrl(props: PropsWithChildren) {
     const refs = useRefSet3(class {
         tabs: TerminalTab[] = [];
+        selectedTab: TerminalTabUid | null = null;
     });
     const wrapRefSet = useRefSet4<HTMLDivElement | null>();
     const termRefSet = useRefSet4<Terminal | null>();
     const fitAddonRefSet = useRefSet4<FitAddon | null>();
 
     const [tabs, tabsUpdate] = useImmer<TerminalTab[]>([]);
-    const [selectedTab, selectedTabSet] = useState<SelectedTab>(null);
+    const [selectedTab, selectedTabUpdate] = useState<SelectedTab | null>(null);
 
     const methods = useInstanceRef(class {
         handleResize() {
@@ -47,8 +48,12 @@ export default function AppCtrl(props: PropsWithChildren) {
 
         handleTerminalMsg = (msg: TerminalMsg) => {
             switch (msg.type) {
-                case TerminalMsgType.TERMINAL_INSTANCES: {
+                case TerminalMsgType.TABS: {
                     this.handleTabs(msg.tabs);
+                    break;
+                }
+                case TerminalMsgType.SELECTED_TAB: {
+                    this.handleSelectedTab(msg.uid);
                     break;
                 }
                 case TerminalMsgType.OUTPUT: {
@@ -66,22 +71,20 @@ export default function AppCtrl(props: PropsWithChildren) {
             tabsUpdate(refs.tabs);
         };
 
+        handleSelectedTab(uid: TerminalTabUid | null) {
+            refs.selectedTab = uid;
+            selectedTabUpdate(refs.selectedTab);
+        };
+
         handleOutput(uid: TerminalTabUid, data: string) {
             const process = termRefSet.get(uid);
             if (!process) {
-                throw new Error('Terminal process not found. Process UID: ' + uid);
+                throw new Error('Terminal process not found on handleOutput method. Process UID: ' + uid);
             }
             process.write(data);
         }
 
         createTab() {
-            // const newTabUid = nanoid();
-            // tabsUpdate(d => {
-            //     d.push({
-            //         uid: newTabUid
-            //     });
-            // });
-            // selectedTabSet(newTabUid);
             TerminalMessenger.createTab();
         };
 
@@ -106,7 +109,7 @@ export default function AppCtrl(props: PropsWithChildren) {
         };
 
         selectTab(uid: TerminalTabUid) {
-            selectedTabSet(uid);
+            TerminalMessenger.selectTab(uid);
         };
 
         requestCopy() {
@@ -144,13 +147,18 @@ export default function AppCtrl(props: PropsWithChildren) {
         methods().handleTerminalMsg(msg as TerminalMsg);
     });
 
-    useEffect(() => {
-        // selectedTabSet(tabs[0].uid);
-    }, []);
 
     useEffect(() => {
         TerminalMessenger.fetchTabs();
     }, []);
+
+    useEffect(() => {
+        if (!selectedTab) {
+            return;
+        }
+        const term = termRefSet.get(selectedTab);
+        term?.focus();
+    }, [selectedTab]);
 
     return (
         <appContext.Provider value={{

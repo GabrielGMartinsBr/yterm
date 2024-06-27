@@ -18,7 +18,14 @@ export class TerminalMessenger {
         });
     }
 
-    static send(uid: TerminalTabUid, key: string) {
+    static selectTab(uid: TerminalTabUid) {
+        window.api.sendToTerminal({
+            type: TerminalMsgType.SELECT_TAB,
+            uid
+        });
+    }
+
+    static sendInput(uid: TerminalTabUid, key: string) {
         window.api.sendToTerminal({
             type: TerminalMsgType.INPUT,
             uid: uid,
