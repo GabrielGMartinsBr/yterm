@@ -126,8 +126,10 @@ export class TerminalBService {
     }
 
     private handleProcessExit() {
-        this.sendTabs();
-        if (!this.terminalMng.hasOpenedProcesses()) {
+        if (this.terminalMng.hasOpenedProcesses()) {
+            this.sendTabs();
+            this.sendSelectedTab();
+        } else {
             app.quit();
         }
     }
