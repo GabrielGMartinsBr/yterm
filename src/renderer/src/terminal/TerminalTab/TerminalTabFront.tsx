@@ -58,7 +58,6 @@ export default function TerminalTabFront(props: Props) {
         term.onRender(() => {
             if (firstRender) {
                 fitAddon.fit();
-                // emitInit();
                 term.focus();
                 firstRender = false;
             }
@@ -75,7 +74,6 @@ export default function TerminalTabFront(props: Props) {
         })
 
         return () => {
-            console.log('dispose:', props.uid)
             term.dispose();
             fitAddon.dispose();
             termRefSet.set(props.uid, null);

@@ -93,22 +93,6 @@ export default function AppCtrl(props: PropsWithChildren) {
         };
 
         closeTab(uid: TerminalTabUid) {
-            // const selectNextTab = (index: number) => {
-            //     let nextTab = tabs[index + 1];
-            //     if (!nextTab) {
-            //         nextTab = tabs[index - 1];
-            //     }
-            //     if (nextTab) {
-            //         selectTab(nextTab.uid);
-            //     }
-            // };
-            // tabsUpdate(d => {
-            //     const index = d.findIndex(i => i.uid === uid);
-            //     if (index > -1) {
-            //         d.splice(index, 1);
-            //         selectNextTab(index);
-            //     }
-            // });
             TerminalMessenger.closeTab(uid);
         };
 
