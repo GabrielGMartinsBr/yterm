@@ -36,6 +36,7 @@ linux:
     - pacman
   maintainer: gabrielmartins.dev
   category: Utility
+  icon: ./resources/icon.png
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
