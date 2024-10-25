@@ -17,6 +17,14 @@ export default function FrameTab(props: Props) {
     props.onClose();
   };
 
+  function formattedName() {
+    if (!props.tab.cwd) {
+      return props.tab.uid;
+    }
+    const name = props.tab.cwd;
+    return name;
+  }
+
   return (
     <div
       onClick={props.onClick}
@@ -34,11 +42,12 @@ export default function FrameTab(props: Props) {
 
       <h3
         className={`@tw{
-          pl-3
+          max-w-xs overflow-hidden
+          pl-3 whitespace-nowrap text-ellipsis text-left direction-rtl
           ${isSelected ? 'text-white font-semibold' : ''}
         }`}
       >
-        {props.tab.cwd}
+        {formattedName()}
       </h3>
 
       <button

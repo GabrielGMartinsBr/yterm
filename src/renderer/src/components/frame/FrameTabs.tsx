@@ -25,22 +25,25 @@ export default function FrameTabs() {
                 flex flex-row gap-2 px-2
                 overflow-hidden
                 }`}
-                >
+        >
             <div
                 className={`@tw{
-                    flex flex-row gap-2 
-                    overflow-x-auto
-                    scrollbar-none
+                    relative flex-1
                 }`}
             >
-                {tabs.map(i => (
-                    <FrameTab
-                        key={i.uid}
-                        tab={i}
-                        onClick={() => handleSelectTab(i.uid)}
-                        onClose={() => handleCloseTab(i.uid)}
-                    />
-                ))}
+                <div className={`@tw{
+                    absolute inset-0 flex flex-row gap-2 
+                    overflow-x-auto overflow-y-hidden scrollbar-none
+                }`}>
+                    {tabs.map(i => (
+                        <FrameTab
+                            key={i.uid}
+                            tab={i}
+                            onClick={() => handleSelectTab(i.uid)}
+                            onClose={() => handleCloseTab(i.uid)}
+                        />
+                    ))}
+                </div>
             </div>
 
             <FrameNewTabButton
