@@ -61,7 +61,7 @@ export default function AppCtrl(props: PropsWithChildren) {
                     break;
                 }
                 default: {
-                    console.log(msg);
+                    // console.log(msg);
                 }
             }
         };
@@ -101,18 +101,19 @@ export default function AppCtrl(props: PropsWithChildren) {
         };
 
         requestCopy() {
-            const tab = refs.tabs[0];
-            const term = termRefSet.get(tab.uid);
+            const tabUid = refs.selectedTab;
+            if (!tabUid) return;
+            const term = termRefSet.get(tabUid);
             if (!term) {
                 throw new Error('Selected tab terminal was not found.');
             }
             const selection = term.getSelection();
-            TerminalMessenger.requestCopy(tab.uid, selection);
+            TerminalMessenger.requestCopy(tabUid, selection);
         }
 
         requestPaste() {
-            const tab = refs.tabs[0];
-            TerminalMessenger.requestPaste(tab.uid);
+            if (!refs.selectedTab) return;
+            TerminalMessenger.requestPaste(refs.selectedTab);
         }
     }, []);
 
